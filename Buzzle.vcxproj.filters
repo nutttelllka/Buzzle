@@ -32,5 +32,8 @@
     <ClInclude Include="classes.h">
       <Filter>Файлы ресурсов</Filter>
     </ClInclude>
+    <ClInclude Include="Old_code_commented.h">
+      <Filter>Файлы ресурсов</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

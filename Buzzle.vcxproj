@@ -149,6 +149,7 @@
     <ClInclude Include="enums.h" />
     <ClInclude Include="functions.h" />
     <ClInclude Include="libs.h" />
+    <ClInclude Include="Old_code_commented.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
