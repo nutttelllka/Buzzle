@@ -1,10 +1,5 @@
-﻿
-
-#include "classes.h"
+﻿#include "classes.h"
 //using namespace std;
-
-
-
 
 int main(int argc, char* args[])
 {
