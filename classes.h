@@ -387,8 +387,11 @@ public:
 	void Show_window()
 	{
 		static int count = 0;
-		LoadBg();//show bg
-		LoadButton();
+		if (!LoadBg()||!LoadButton())
+		{
+			printf("Failed to initialize!\n");
+		}
+		
 		texture_bg.renderP();
 		for (int i = 0; i < count_of_but; i++)
 		{
@@ -652,6 +655,58 @@ public:
 		pictures[selected_pic].renderP();
 	}
 };
+class Exit : public CurrentWindow
+{
+private:
+	int selected_window;
+public:
+	Exit(int x_but, int y_but, int margin, int height_but, int width_but, int count_of_but = COUNT_OF_LEVELSELECTION_BUTTONS) :CurrentWindow(x_but, y_but, margin, height_but, width_but, count_of_but)
+	{
+
+	}
+	int GetSelectedWindow()
+	{
+		return  selected_window;
+	}
+	void SetSelectedWindow(int selected_window)
+	{
+		this->selected_window = selected_window;
+	}
+	bool LoadButton()override
+	{
+		bool success = true;
+		if (!button[YES].loadButton("img\\Exit\\yes.png"))
+		{
+			success = false;
+		}
+		if (!button[NO].loadButton("img\\Exit\\no.png"))
+		{
+			success = false;
+		}
+		return success;
+	}
+	bool LoadBg()override
+	{
+		bool success = true;
+		if (!texture_bg.loadFromFile("img\\Exit\\bg.png"))
+		{
+			success = false;
+		}
+		return success;
+	}
+	int SelectedButtonInCurrentWindow(int button)override
+	{
+		switch (button)
+		{
+		case YES:
+			return CLOSE_GAME;
+		case NO:
+			return selected_window;
+		case EXIT_WIND:
+			return CLOSE_GAME;
+		}
+	}
+};
 class PuzzlePiece
 {
 private:
@@ -756,4 +811,5 @@ public:
 		return success;
 	}
 };
+
 
