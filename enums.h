@@ -3,7 +3,7 @@
 enum ScreenParams
 {
 	SCREEN_WIDTH = 1500,
-	SCREEN_HEIGHT = 1000
+	SCREEN_HEIGHT = 850
 };
 //Button constants
 enum ButtonParams
@@ -60,7 +60,8 @@ enum Window
 	MENU_WIND,
 	GAME_WIND,
 	GALLERY_WIND,
-	EXIT_WIND
+	EXIT_WIND,
+	CLOSE_GAME
 };
 enum KeyPress
 {
@@ -78,4 +79,10 @@ enum Pictures
 	SECOND,
 	THIRD,
 	COUNT_OF_PIC = 3
+};
+enum ExitButtons
+{
+	YES,
+	NO,
+	COUNT_OF_BUT = 2
 };

@@ -29,20 +29,30 @@ int main(int argc, char* args[])
 			//SDL_Delay(6000);
 
 			int window_click = Window::MENU_WIND;
-			while (window_click != Window::EXIT_WIND)
+			int wind_to_return = Window::MENU_WIND;
+			while (window_click != Window::CLOSE_GAME)
 			{
 				switch (window_click)
 				{
 				case Window::MENU_WIND:
+					wind_to_return = MENU_WIND;
 					window_click = m.click_window();
 					break;
 				case Window::GALLERY_WIND:
 					//g.Show_gallery();
-					g.ShowPics();
+					wind_to_return = GALLERY_WIND;
 					window_click = g.click_window();
 					break;
 				case Window::GAME_WIND:
+					wind_to_return = GAME_WIND;
 					window_click = l.click_window();
+
+					break;
+				case Window::EXIT_WIND:
+					Exit e;
+
+					//e.SetSelectedWindow(wind_to_return);
+					window_click = e.click_window();
 					break;
 				}
 

@@ -16,17 +16,29 @@ bool loadMedia();
 //Frees media and shuts down SDL
 void close();
 
-bool EscapeIsPressed(SDL_Event e)
+bool x_is_pressed(SDL_Event e)
 {
 	if (e.type == SDL_QUIT)
 		return true;
-	else if (e.type == SDL_KEYDOWN)
+	return false;
+}
+bool esc_is_pressed(SDL_Event e)
+{
+	if (e.type == SDL_KEYDOWN)
 	{
 		if (e.key.keysym.sym == SDLK_ESCAPE)
 			return true;
 	}
 	return false;
+
 }
+bool x_or_esc_is_pressed(SDL_Event e)
+{
+	if (x_is_pressed(e) || esc_is_pressed(e))
+		return true;
+	return false;
+}
+
 //LButton gButtons[TOTAL_BUTTONS];
 bool init()
 {
