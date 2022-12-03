@@ -13,6 +13,9 @@ class Menu;
 class LevelSelection;
 class Gallery;
 class PuzzlePiece;
+class Exit;
+
+bool is_exit(int window, SDL_Event ev);
 
 class LTexture
 {
@@ -335,16 +338,13 @@ class CurrentWindow abstract
 protected:
 	Picture texture_bg;
 	int count_of_but;
-	
-public:
 	vector <LButton> button;
-	CurrentWindow()
+	 int window;
+public:
+	
+	CurrentWindow(int x_but, int y_but, int margin, int height_but, int width_but, int count_of_but,int window, bool vert_but = true)
 	{
-
-	}
-	CurrentWindow(int x_but, int y_but, int margin, int height_but, int width_but, int count_of_but, bool vert_but = true)
-	{
-
+		this->window = window;
 		this->count_of_but = count_of_but;
 		for (int i = 0; i < count_of_but; i++)
 		{
@@ -360,7 +360,7 @@ public:
 			else
 			{
 				button[i].setPosition(x_but, y_but);
-				x_but += margin;
+				x_but += margin ;
 			}
 			button[i].setHeight(height_but);
 			button[i].setWidth(width_but);
@@ -417,9 +417,13 @@ public:
 			//Handle events on queue
 			while (SDL_PollEvent(&e) != 0)
 			{
-				if (EscapeIsPressed(e))
-					return SelectedButtonInCurrentWindow(EXIT_WIND);
-
+				if (x_or_esc_is_pressed(e))
+				{
+					if (is_exit(window, e))
+						return CLOSE_GAME;
+				}
+					//return SelectedButtonInCurrentWindow(EXIT_WIND);
+				Show_window();
 				for (int i = 0; i < count_of_but; i++)
 				{
 					event_buttons[i] = button[i].handleEvent(&e);
@@ -461,10 +465,88 @@ public:
 		}
 	}
 };
+class Exit : public CurrentWindow
+{
+private:
+	int selected_window;
+	static int count_of_wind;
+public:
+	Exit() :CurrentWindow(306, 670, 460, 107, 430, ExitButtons::COUNT_OF_BUT,Window::EXIT_WIND, false)
+	{
+		count_of_wind++;
+	}
+	~Exit()
+	{
+		count_of_wind--;
+	}
+	int GetCountOfWind()
+	{
+		return count_of_wind;
+	}
+	int GetSelectedWindow()
+	{
+		return  selected_window;
+	}
+	void SetSelectedWindow(int selected_window)
+	{
+		this->selected_window = selected_window;
+	}
+	bool LoadButton()override
+	{
+		bool success = true;
+		if (!button[YES].loadButton("img\\Exit\\yes.png"))
+		{
+			success = false;
+		}
+		if (!button[NO].loadButton("img\\Exit\\no.png"))
+		{
+			success = false;
+		}
+		return success;
+	}
+	bool LoadBg()override
+	{
+		bool success = true;
+		if (!texture_bg.loadFromFile("img\\Exit\\bg.png"))
+		{
+			success = false;
+		}
+		return success;
+	}
+	int SelectedButtonInCurrentWindow(int button)override
+	{
+		switch (button)
+		{
+		case YES:
+			return CLOSE_GAME;
+			break;
+		case NO:
+			return selected_window;
+			break;
+		case EXIT_WIND:
+			return CLOSE_GAME;
+		}
+		//switch (button)
+		//{
+		//case YES:
+		//	return CLOSE_GAME;
+		//	break;
+		//case NO:
+		//	return selected_window;
+		//	break;
+		//case EXIT_WIND:
+		//	return CLOSE_GAME;
+		//}
+	}
+
+};
+int Exit::count_of_wind = 0;
 class Menu : public CurrentWindow
 {
 public:
-	Menu(int x_but, int y_but, int margin, int height_but, int width_but, int count_of_but = ButtonNameInMenu::COUNT_OF_BUTTONS) :CurrentWindow(x_but, y_but, margin, height_but, width_but, count_of_but)
+	Menu(int x_but, int y_but, int margin,
+		int height_but, int width_but,
+		int count_of_but = ButtonNameInMenu::COUNT_OF_BUTTONS) :CurrentWindow(x_but, y_but, margin, height_but, width_but, count_of_but, Window::EXIT_WIND)
 	{
 
 	}
@@ -515,7 +597,11 @@ public:
 class LevelSelection : public CurrentWindow
 {
 public:
-	LevelSelection(int x_but, int y_but, int margin, int height_but, int width_but, int count_of_but = COUNT_OF_LEVELSELECTION_BUTTONS) :CurrentWindow(x_but, y_but, margin, height_but, width_but, count_of_but)
+	LevelSelection(int x_but, int y_but, 
+		int margin, int height_but, 
+		int width_but,
+		int count_of_but = COUNT_OF_LEVELSELECTION_BUTTONS)
+		:CurrentWindow(x_but, y_but, margin, height_but, width_but, count_of_but, Window::GAME_WIND)
 	{
 
 	}
@@ -554,7 +640,7 @@ public:
 		switch (button)
 		{
 		case EXIT_WIND:
-			return MENU_WIND;
+			return EXIT_WIND;
 			break;
 		}
 	}
@@ -567,7 +653,8 @@ private:
 public:
 	Gallery(int x_but, int y_but, int margin,
 		int height_but, int width_but,
-		int count_of_but = COUNT_BUT_GAL) :CurrentWindow(x_but, y_but, margin, height_but, width_but, count_of_but, false)
+		int count_of_but = COUNT_BUT_GAL)
+		:CurrentWindow(x_but, y_but, margin, height_but, width_but, count_of_but, Window::GALLERY_WIND, false)
 	{
 		for (int i = 0; i < COUNT_OF_PIC; i++)
 		{
@@ -646,65 +733,15 @@ public:
 			}
 			break;
 		case EXIT_WIND:
-			return MENU_WIND;
+
+			return EXIT_WIND;
+
 			break;
 		}
 	}
 	void ShowPics()
 	{
 		pictures[selected_pic].renderP();
-	}
-};
-class Exit : public CurrentWindow
-{
-private:
-	int selected_window;
-public:
-	Exit(int x_but, int y_but, int margin, int height_but, int width_but, int count_of_but = COUNT_OF_LEVELSELECTION_BUTTONS) :CurrentWindow(x_but, y_but, margin, height_but, width_but, count_of_but)
-	{
-
-	}
-	int GetSelectedWindow()
-	{
-		return  selected_window;
-	}
-	void SetSelectedWindow(int selected_window)
-	{
-		this->selected_window = selected_window;
-	}
-	bool LoadButton()override
-	{
-		bool success = true;
-		if (!button[YES].loadButton("img\\Exit\\yes.png"))
-		{
-			success = false;
-		}
-		if (!button[NO].loadButton("img\\Exit\\no.png"))
-		{
-			success = false;
-		}
-		return success;
-	}
-	bool LoadBg()override
-	{
-		bool success = true;
-		if (!texture_bg.loadFromFile("img\\Exit\\bg.png"))
-		{
-			success = false;
-		}
-		return success;
-	}
-	int SelectedButtonInCurrentWindow(int button)override
-	{
-		switch (button)
-		{
-		case YES:
-			return CLOSE_GAME;
-		case NO:
-			return selected_window;
-		case EXIT_WIND:
-			return CLOSE_GAME;
-		}
 	}
 };
 class PuzzlePiece
@@ -812,4 +849,22 @@ public:
 	}
 };
 
+bool is_exit(int selected_window, SDL_Event ev)
+{
+	Exit e;
+
+	if (e.GetCountOfWind() > 1)
+	{
+
+		if (x_is_pressed(ev))
+			return true;
+		return false;
+
+	}
+	e.SetSelectedWindow(selected_window);
+	if (e.click_window() == CLOSE_GAME)
+		return true;
+	else
+		return false;
+}
 

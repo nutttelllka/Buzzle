@@ -14,7 +14,6 @@ int main(int argc, char* args[])
 		LevelSelection l(535, 429, 124, 107, 430);
 		Gallery g(74, 374, 1214, 252, 138);
 		Puzzle pzz;
-		Exit e(535, 429, 125, 107, 430);
 		//Load media
 		if (!m.LoadButton() ||
 			!l.LoadButton() ||
@@ -42,16 +41,19 @@ int main(int argc, char* args[])
 				case Window::GALLERY_WIND:
 					//g.Show_gallery();
 					wind_to_return = GALLERY_WIND;
-					//g.ShowPics();
 					window_click = g.click_window();
 					break;
 				case Window::GAME_WIND:
 					wind_to_return = GAME_WIND;
 					window_click = l.click_window();
+
 					break;
 				case Window::EXIT_WIND:
-					e.SetSelectedWindow(wind_to_return);
+					Exit e;
+
+					//e.SetSelectedWindow(wind_to_return);
 					window_click = e.click_window();
+					break;
 				}
 
 			}
