@@ -421,9 +421,10 @@ public:
 				{
 					if (is_exit(window, e))
 						return CLOSE_GAME;
+					Show_window();
 				}
 					//return SelectedButtonInCurrentWindow(EXIT_WIND);
-				Show_window();
+
 				for (int i = 0; i < count_of_but; i++)
 				{
 					event_buttons[i] = button[i].handleEvent(&e);
@@ -544,9 +545,7 @@ int Exit::count_of_wind = 0;
 class Menu : public CurrentWindow
 {
 public:
-	Menu(int x_but, int y_but, int margin,
-		int height_but, int width_but,
-		int count_of_but = ButtonNameInMenu::COUNT_OF_BUTTONS) :CurrentWindow(x_but, y_but, margin, height_but, width_but, count_of_but, Window::EXIT_WIND)
+	Menu() :CurrentWindow(535, 429, 125, 107, 430, COUNT_OF_BUTTONS, Window::EXIT_WIND)
 	{
 
 	}
@@ -629,7 +628,7 @@ public:
 	bool LoadBg()override
 	{
 		bool success = true;
-		if (!texture_bg.loadFromFile("img\\Background_Gallery.png"))
+		if (!texture_bg.loadFromFile("img\\Level\\Background.png"))
 		{
 			success = false;
 		}
@@ -639,9 +638,14 @@ public:
 	{
 		switch (button)
 		{
-		case EXIT_WIND:
-			return EXIT_WIND;
-			break;
+		case LevelSelectionButtonName::LEVEL1:
+			return Window::MENU_WIND;
+		case LevelSelectionButtonName::LEVEL2:
+			return Window::MENU_WIND;
+		case LevelSelectionButtonName::LEVEL3:
+			return Window::MENU_WIND;
+		case LevelSelectionButtonName::BACK:
+			return MENU_WIND;
 		}
 	}
 };
@@ -677,7 +681,7 @@ public:
 	bool LoadBg()override
 	{
 		bool success = true;
-		if (!texture_bg.loadFromFile("img\\Background_Gallery.png"))
+		if (!texture_bg.loadFromFile("img\\Gallery\\1 not_opened.png"))
 		{
 			success = false;
 		}
@@ -686,15 +690,15 @@ public:
 	bool Load_Pics()
 	{
 		bool success = true;
-		if (!pictures[FIRST].loadFromFile("img\\Gallery\\1.png"))
+		if (!pictures[FIRST].loadFromFile("img\\Gallery\\1 not_opened.png"))
 		{
 			success = false;
 		}
-		if (!pictures[SECOND].loadFromFile("img\\Gallery\\2.png"))
+		if (!pictures[SECOND].loadFromFile("img\\Gallery\\1 not_opened.png"))
 		{
 			success = false;
 		}
-		if (!pictures[THIRD].loadFromFile("img\\Gallery\\2.png"))
+		if (!pictures[THIRD].loadFromFile("img\\Gallery\\1 not_opened.png"))
 		{
 			success = false;
 		}
@@ -855,11 +859,9 @@ bool is_exit(int selected_window, SDL_Event ev)
 
 	if (e.GetCountOfWind() > 1)
 	{
-
 		if (x_is_pressed(ev))
 			return true;
 		return false;
-
 	}
 	e.SetSelectedWindow(selected_window);
 	if (e.click_window() == CLOSE_GAME)

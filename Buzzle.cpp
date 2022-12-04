@@ -10,12 +10,12 @@ int main(int argc, char* args[])
 	}
 	else
 	{
-		Menu m(535, 429, 125, 107, 430);
+		Menu m;
 		LevelSelection l(535, 429, 124, 107, 430);
 		Gallery g(74, 374, 1214, 252, 138);
 		Puzzle pzz;
 		//Load media
-		if (!m.LoadButton() ||
+		if (//!m.LoadButton() ||
 			!l.LoadButton() ||
 			//!pzz.loadPuzzle("img/Puzzle1.png") || 
 			!loadMedia() || !g.Load_Pics())
@@ -32,9 +32,11 @@ int main(int argc, char* args[])
 			int wind_to_return = Window::MENU_WIND;
 			while (window_click != Window::CLOSE_GAME)
 			{
+
 				switch (window_click)
 				{
 				case Window::MENU_WIND:
+
 					wind_to_return = MENU_WIND;
 					window_click = m.click_window();
 					break;
