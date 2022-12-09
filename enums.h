@@ -40,14 +40,6 @@ enum LevelSelectionButtonName
 	BACK,
 	COUNT_OF_LEVELSELECTION_BUTTONS = 4
 };
-enum PuzzlepieceParams
-{
-	PUZZLEPIECE_WIDTH = 140,
-	PUZZLEPIECE_HEIGHT = 140,
-	PUZZLEPIECES_HOR = 5, // puzzle pieces horizontal count
-	PUZZLEPIECES_VERT = 5, // puzzle pieces vertical count
-	MARGIN = 20
-};
 enum PuzzlepieceSprites
 {
 	NOT_SELECTED = 0,
@@ -61,7 +53,10 @@ enum Window
 	GAME_WIND,
 	GALLERY_WIND,
 	EXIT_WIND,
-	CLOSE_GAME
+	CLOSE_GAME,
+	LEVEL1_WIND,
+	LEVEL2_WIND,
+	LEVEL3_WIND
 };
 enum KeyPress
 {

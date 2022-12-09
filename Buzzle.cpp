@@ -13,11 +13,15 @@ int main(int argc, char* args[])
 		Menu m;
 		LevelSelection l(535, 429, 124, 107, 430);
 		Gallery g(74, 374, 1214, 252, 138);
-		Puzzle pzz;
+		Puzzle pzz1(1);
+		Puzzle pzz2(2);
+		Puzzle pzz3(3);
 		//Load media
 		if (//!m.LoadButton() ||
 			!l.LoadButton() ||
-			//!pzz.loadPuzzle("img/Puzzle1.png") || 
+			!pzz1.loadPuzzle() ||
+			!pzz2.loadPuzzle() ||
+			!pzz3.loadPuzzle() ||
 			!loadMedia() || !g.Load_Pics())
 		{
 			printf("Failed to load media!\n");
@@ -49,6 +53,18 @@ int main(int argc, char* args[])
 					wind_to_return = GAME_WIND;
 					window_click = l.click_window();
 
+					break;
+				case Window::LEVEL1_WIND:
+					wind_to_return = LEVEL1_WIND;
+					pzz1.Game();
+					break;
+				case Window::LEVEL2_WIND:
+					wind_to_return = LEVEL2_WIND;
+					pzz2.Game();
+					break;
+				case Window::LEVEL3_WIND:
+					wind_to_return = LEVEL3_WIND;
+					pzz3.Game();
 					break;
 				case Window::EXIT_WIND:
 					Exit e;
