@@ -3,7 +3,7 @@
 enum ScreenParams
 {
 	SCREEN_WIDTH = 1500,
-	SCREEN_HEIGHT = 780
+	SCREEN_HEIGHT = 850
 };
 //Button constants
 enum ButtonParams
