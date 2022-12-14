@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "functions.h"
 
 /// <summary>
@@ -15,7 +15,7 @@ class Gallery;
 class PuzzlePiece;
 class Exit;
 
-bool is_exit(int window, SDL_Event ev);
+bool is_exit(SDL_Event ev);
 
 class LTexture
 {
@@ -124,6 +124,27 @@ public:
 
 };
 LTexture IntroTextures[2];
+
+bool loadMedia()
+{
+	//Loading success flag
+	bool success = true;
+	//Load PNG texture
+	if (!IntroTextures[0].loadFromFile("img\\logo1.png"))
+	{
+		printf("Failed to load intro logo1 texture!\n");
+		success = false;
+	}
+
+	//Load PNG texture
+	if (!IntroTextures[1].loadFromFile("img\\logo2.png"))
+	{
+		printf("Failed to load intro logo2 texture!\n");
+		success = false;
+	}
+	return success;
+}
+bool stop_timer = false;
 DWORD WINAPI Intro(void* param)
 {
 	//Clear screen
@@ -134,7 +155,7 @@ DWORD WINAPI Intro(void* param)
 	//Update screen
 	SDL_RenderPresent(gRenderer);
 
-	SDL_Delay(3000);
+	SDL_Delay(2000);
 
 	//Clear screen
 	SDL_RenderClear(gRenderer);
@@ -142,6 +163,7 @@ DWORD WINAPI Intro(void* param)
 	IntroTextures[1].render(0, 0);
 	//Update screen
 	SDL_RenderPresent(gRenderer);
+	SDL_Delay(2000);
 	return 0;
 }
 class Picture : public LTexture
@@ -149,6 +171,8 @@ class Picture : public LTexture
 private:
 	int x;
 	int y;
+	int height;
+	int width;
 public:
 	Picture() :Picture(0, 0)
 	{
@@ -156,6 +180,7 @@ public:
 	Picture(int x, int y)
 	{
 		setPosition(x, y);
+
 	}
 	void setX(int x)
 	{
@@ -165,6 +190,22 @@ public:
 	{
 		this->y = y;
 	}
+	int getX()
+	{
+		return x;
+	}
+	int getY()
+	{
+		return y;
+	}
+	void setWidth(int width)
+	{
+		this->width = width;
+	}
+	void setHeight(int height)
+	{
+		this->height = height;
+	}
 	void setPosition(int x, int y)
 	{
 		setX(x);
@@ -173,6 +214,16 @@ public:
 	void renderP()
 	{
 		render(x, y);
+	}
+	void render_with_sprite(SDL_Rect* clip = NULL)
+	{
+		SDL_Rect renderQuad = { x, y, width, height };
+		if (clip != NULL)
+		{
+			renderQuad.w = clip->w;
+			renderQuad.h = clip->h;
+		}
+		render(x, y, &renderQuad);
 	}
 };
 /// <summary>
@@ -333,6 +384,232 @@ public:
 
 
 };
+class Cutting
+{
+private:
+	Picture pic;
+	//Currently used sprite
+	Number_sprite CurrentSprite;
+	SDL_Rect sprite_clips[Number_sprite::COUNT_OF_DIG];
+	Picture current_pic;
+public:
+	Cutting() :Cutting(WIDTH_OF_PIC, HEIGHT_OF_PIC, 0, 0)
+	{
+	}
+	Cutting(int width, int height, int x, int y)
+	{
+		setHeight(height);
+		setWidth(width);
+		setPosition(x, y);
+		CurrentSprite = ZERO;
+	}
+	void setHeight(int height)
+	{
+		pic.setHeight(height);
+	}
+	void setWidth(int width)
+	{
+		pic.setWidth(width);
+	}
+	void SetCurrentSprite(int CurrentSprite)
+	{
+		CurrentSprite = CurrentSprite;
+	}
+	/// <summary>
+	/// Sets top left position
+	/// </summary>
+	/// <param name="x">X coordinate</param>
+	/// <param name="y">Y coordinate</param>
+
+	void SetMCurrentSprite(Number_sprite sprite)
+	{
+		CurrentSprite = sprite;
+	}
+	void setPosition(int x, int y)
+	{
+		pic.setPosition(x, y);
+	}
+	bool loadNumber(string link)
+	{
+		//Loading success flag
+		bool success = true;
+
+		//Load sprites
+		if (!pic.loadFromFile(link))
+		{
+			printf("Failed to load button sprite texture!\n");
+			success = false;
+		}
+		else
+		{
+			//Set sprites
+			for (int i = 0; i < Number_sprite::COUNT_OF_DIG; ++i)
+			{
+				
+
+
+				sprite_clips[i].x = i * WIDTH_OF_PIC;
+				sprite_clips[i].y = 0;
+				sprite_clips[i].w = WIDTH_OF_PIC;
+				sprite_clips[i].h = HEIGHT_OF_PIC;
+			}
+		}
+
+		return success;
+	}
+	void show()
+	{
+		current_pic.render_with_sprite(&sprite_clips[CurrentSprite]);
+	}
+	void show_with_shift_x(int x)
+	{
+		current_pic.render(x, current_pic.getY(),&sprite_clips[CurrentSprite]);
+	}
+	void show_with_shift_x(int x, Number_sprite current_num)
+	{
+		CurrentSprite = current_num;
+		current_pic.render(x, current_pic.getY(), &sprite_clips[CurrentSprite]);
+	}
+};
+class Timer {
+	int size;
+	int min;//минуты
+	int sec;
+	int count_of_sec = 0;
+	int x = 0, y = 0, z = 0, w = 0; //изменение определенных цифр во времени
+	//Picture numbers[Number::COUNT_OF_DIG];
+	Cutting numbers;
+	//SDL_Rect texture_of_number;
+public:
+	Timer() : Timer(590,20) {
+
+	}
+	Timer(int count_of_sec, int width_of_numb) {
+		this->count_of_sec = count_of_sec;
+		size = 20;
+		min = 0;
+		//texture_of_number.y = 35;
+		sec = this->count_of_sec;
+		if (!loadNumb())
+		{
+			cout << "Ti durak:)";
+		}
+	}
+	bool loadNumb()
+	{
+		bool success = true;
+		if (!numbers.loadNumber("img\\Gameplay\\number.png"))
+		{
+			success = false;
+		}
+		return success;
+	}
+	void Converter() {
+		while (sec > 60)
+		{
+			min++;
+			sec -= 60;
+		}
+	}
+	void PrintAll(/*Surf game*/) {
+		x = sec % 10;
+		//numbers.show_with_shift_x()
+		//texture_of_number.x = SCREEN_WIDTH - size * 2;
+		////showPic(game, texture_of_number, NUMBERS, x);
+		//game.showPic(game.GetNumber(x), texture_of_number);
+
+		y = (sec / 10);
+		//texture_of_number.x -= size;
+		////showPic(game, texture_of_number, NUMBERS, y);
+		//game.showPic(game.GetNumber(y), texture_of_number);
+
+		//texture_of_number.x -= size;
+		////showPic(game, texture_of_number, NUMBERS, 10);
+		//game.showPic(game.GetNumber(10), texture_of_number);
+
+		z = min % 10;
+		//texture_of_number.x -= size;
+		////showPic(game, texture_of_number, NUMBERS, z);
+		//game.showPic(game.GetNumber(z), texture_of_number);
+
+		w = (min / 10);
+		//texture_of_number.x -= size;
+		////showPic(game, texture_of_number, NUMBERS, w);
+		//game.showPic(game.GetNumber(w), texture_of_number);
+
+	}
+	void timeGo(/*Surf& game*/) {
+
+		Converter();
+		PrintAll(/*game*/);
+		while (!stop_timer)
+		{
+
+			if (sec == 60) {
+				min++;
+				sec = 0;
+				x = 0; y = 0;
+				z = min % 10;
+				//if (min - 1 >= 0) {
+				//	min--;
+				//	sec = 60;
+				//	z = min % 10;
+				//	//texture_of_number.x = SCREEN_WIDTH/2 - size/2 - size;
+				//	//showPic(game, texture_of_number, NUMBERS, z);
+				//	//game.showPic(game.GetNumber(z), texture_of_number);
+				//	if ((min / 10) - 1 >= 0) {
+				//		w = (min / 10);
+				//		//texture_of_number.x = SCREEN_WIDTH - size * 6;
+				//		//showPic(game, texture_of_number, NUMBERS, w);
+				//		//game.showPic(game.GetNumber(w), texture_of_number);
+
+				//	}
+				//}
+				if ((min / 10) - 1 >= 0) {
+					w = (min / 10);
+					//texture_of_number.x = SCREEN_WIDTH/2 - size/2 - size * 2;
+					//showPic(game, texture_of_number, NUMBERS, w);
+					//game.showPic(game.GetNumber(w), texture_of_number);
+				}
+				/*if ((sec / 10) - 1 == 0) {
+
+				}*/
+			}
+			cout << w << z << ":" << y << x << endl;
+			sec++;
+			//if (x == 0) {
+			//	y = (sec / 10) % 10;
+			//	//texture_of_number.x = SCREEN_WIDTH - size * 3;
+			//	//showPic(game, texture_of_number, NUMBERS, y);
+			//	//game.showPic(game.GetNumber(y), texture_of_number);
+			//}
+			if (x + 1 == 10) {
+				y++;
+			}
+			x = sec % 10;
+			//texture_of_number.x = SCREEN_WIDTH - size * 2;
+			//showPic(game, texture_of_number, NUMBERS, x);
+			//game.showPic(game.GetNumber(x), texture_of_number);
+			count_of_sec++;
+			/*if (min == 0 && sec == 0) {
+				stop_timer = true;
+				return;
+			}*/
+
+			this_thread::sleep_for(chrono::milliseconds(1000));
+		}
+	}
+
+
+	int GetCountSec() {
+		return count_of_sec;
+	}
+	void SetCountSec(unsigned int digit) {
+
+		count_of_sec = digit;
+	}
+
+};
 class CurrentWindow abstract
 {
 protected:
@@ -419,7 +696,7 @@ public:
 			{
 				if (x_or_esc_is_pressed(e))
 				{
-					if (is_exit(window, e))
+					if (is_exit(e))
 						return CLOSE_GAME;
 					Show_window();
 				}
@@ -653,7 +930,7 @@ class Gallery : public CurrentWindow
 {
 private:
 	Picture pictures[COUNT_OF_PIC];
-	int selected_pic = FIRST;
+	static int selected_pic;
 public:
 	Gallery(int x_but, int y_but, int margin,
 		int height_but, int width_but,
@@ -748,8 +1025,24 @@ public:
 		pictures[selected_pic].renderP();
 	}
 };
-
-bool is_exit(int selected_window, SDL_Event ev)
+int Gallery::selected_pic = FIRST;
+//bool is_exit(int selected_window, SDL_Event ev)
+//{
+//	Exit e;
+//
+//	if (e.GetCountOfWind() > 1)
+//	{
+//		if (x_is_pressed(ev))
+//			return true;
+//		return false;
+//	}
+//	e.SetSelectedWindow(selected_window);
+//	if (e.click_window() == CLOSE_GAME)
+//		return true;
+//	else
+//		return false;
+//}
+bool is_exit( SDL_Event ev)
 {
 	Exit e;
 
@@ -759,7 +1052,7 @@ bool is_exit(int selected_window, SDL_Event ev)
 			return true;
 		return false;
 	}
-	e.SetSelectedWindow(selected_window);
+	//e.SetSelectedWindow(selected_window);
 	if (e.click_window() == CLOSE_GAME)
 		return true;
 	else
@@ -1341,7 +1634,7 @@ public:
 		}
 	}
 
-	void Game()
+	int Game()
 	{
 		RenderBG();
 		bool quit = false;
@@ -1349,16 +1642,25 @@ public:
 
 		Slot* selected_slot = nullptr;
 		PuzzlePiece* selected_puzzlepiece = nullptr;
-
+		Timer timer;
+		
+		thread th(&Timer::timeGo, ref(timer));//ref - используется 
+		th.detach();
+		stop_timer = false;
 		while (!quit)
 		{
 			//Handle events on queue
 			while (SDL_PollEvent(&e) != 0)
 			{
+
 				//User requests quit
-				if (e.type == SDL_QUIT)
+				if (x_or_esc_is_pressed(e))
 				{
-					quit = true;
+					stop_timer = true;
+					if (is_exit( e))
+						return CLOSE_GAME;
+					RenderBG();
+					stop_timer = false;
 				}
 				//Finding a selected slot
 				for (int i = 0; i < PUZZLEPIECES_VERT; i++)
