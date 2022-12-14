@@ -3,7 +3,7 @@
 enum ScreenParams
 {
 	SCREEN_WIDTH = 1500,
-	SCREEN_HEIGHT = 780
+	SCREEN_HEIGHT = 1000
 };
 //Button constants
 enum ButtonParams
@@ -80,4 +80,11 @@ enum ExitButtons
 	YES,
 	NO,
 	COUNT_OF_BUT = 2
+};
+enum Number_sprite
+{
+	ZERO,ONE,TWO,THREE,FOUR,FIVE,SIX,SEVEN,EIGHT,NINE,TWO_DOT,
+	COUNT_OF_DIG = 11,
+	WIDTH_OF_PIC = 30,
+	HEIGHT_OF_PIC = 36
 };

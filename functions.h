@@ -16,6 +16,7 @@ bool loadMedia();
 //Frees media and shuts down SDL
 void close();
 
+
 bool x_is_pressed(SDL_Event e)
 {
 	if (e.type == SDL_QUIT)
@@ -91,25 +92,25 @@ bool init()
 
 	return success;
 }
-bool loadMedia()
-{
-	//Loading success flag
-	bool success = true;
-	//Load PNG texture
-	/*if (!IntroTextures[0].loadFromFile("img\\logo1.png"))
-	{
-		printf("Failed to load intro logo1 texture!\n");
-		success = false;
-	}*/
-
-	//Load PNG texture
-	//if (!IntroTextures[1].loadFromFile("img\\logo2.png"))
-	//{
-	//	printf("Failed to load intro logo2 texture!\n");
-	//	success = false;
-	//}
-	return success;
-}
+//bool loadMedia()
+//{
+//	//Loading success flag
+//	bool success = true;
+//	//Load PNG texture
+//	if (!IntroTextures[0].loadFromFile("img\\logo1.png"))
+//	{
+//		printf("Failed to load intro logo1 texture!\n");
+//		success = false;
+//	}
+//
+//	//Load PNG texture
+//	if (!IntroTextures[1].loadFromFile("img\\logo2.png"))
+//	{
+//		printf("Failed to load intro logo2 texture!\n");
+//		success = false;
+//	}
+//	return success;
+//}
 void close()
 {
 	//Free loaded images
