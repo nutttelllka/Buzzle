@@ -387,13 +387,16 @@ public:
 class Cutting
 {
 private:
-	Picture pic;
+	//Top left position
+	SDL_Point Position;
+	LTexture pic;
 	//Currently used sprite
-	Number_sprite CurrentSprite;
+	int CurrentSprite;
 	SDL_Rect sprite_clips[Number_sprite::COUNT_OF_DIG];
-	Picture current_pic;
+	int height;
+	int width;
 public:
-	Cutting() :Cutting(WIDTH_OF_PIC, HEIGHT_OF_PIC, 0, 0)
+	Cutting() :Cutting(WIDTH_OF_PIC, HEIGHT_OF_PIC, 0, 61)
 	{
 	}
 	Cutting(int width, int height, int x, int y)
@@ -401,19 +404,20 @@ public:
 		setHeight(height);
 		setWidth(width);
 		setPosition(x, y);
+
 		CurrentSprite = ZERO;
 	}
 	void setHeight(int height)
 	{
-		pic.setHeight(height);
+		this->height = height;
 	}
 	void setWidth(int width)
 	{
-		pic.setWidth(width);
+		this->width = width;
 	}
 	void SetCurrentSprite(int CurrentSprite)
 	{
-		CurrentSprite = CurrentSprite;
+		this->CurrentSprite = CurrentSprite;
 	}
 	/// <summary>
 	/// Sets top left position
@@ -427,7 +431,8 @@ public:
 	}
 	void setPosition(int x, int y)
 	{
-		pic.setPosition(x, y);
+		Position.x = x;
+		Position.y = y;
 	}
 	bool loadNumber(string link)
 	{
@@ -445,9 +450,6 @@ public:
 			//Set sprites
 			for (int i = 0; i < Number_sprite::COUNT_OF_DIG; ++i)
 			{
-				
-
-
 				sprite_clips[i].x = i * WIDTH_OF_PIC;
 				sprite_clips[i].y = 0;
 				sprite_clips[i].w = WIDTH_OF_PIC;
@@ -459,16 +461,17 @@ public:
 	}
 	void show()
 	{
-		current_pic.render_with_sprite(&sprite_clips[CurrentSprite]);
+		//current_pic.render_with_sprite(&sprite_clips[CurrentSprite]);
 	}
-	void show_with_shift_x(int x)
+	/*void show_with_shift_x(int x)
 	{
 		current_pic.render(x, current_pic.getY(),&sprite_clips[CurrentSprite]);
-	}
-	void show_with_shift_x(int x, Number_sprite current_num)
+	}*/
+	void show_with_shift_x(int x, int current_num)
 	{
 		CurrentSprite = current_num;
-		current_pic.render(x, current_pic.getY(), &sprite_clips[CurrentSprite]);
+		pic.render(x, Position.y, &sprite_clips[CurrentSprite]);
+		SDL_RenderPresent(gRenderer);
 	}
 };
 class Timer {
@@ -481,19 +484,17 @@ class Timer {
 	Cutting numbers;
 	//SDL_Rect texture_of_number;
 public:
-	Timer() : Timer(590,20) {
+	Timer() : Timer(0, 30) {
 
 	}
 	Timer(int count_of_sec, int width_of_numb) {
 		this->count_of_sec = count_of_sec;
-		size = 20;
+		size = width_of_numb;
 		min = 0;
 		//texture_of_number.y = 35;
 		sec = this->count_of_sec;
-		if (!loadNumb())
-		{
-			cout << "Ti durak:)";
-		}
+		loadNumb();
+
 	}
 	bool loadNumb()
 	{
@@ -511,37 +512,50 @@ public:
 			sec -= 60;
 		}
 	}
+	/*Number_sprite Switch(int num) {
+
+		switch (num) {
+		case 1:
+		}
+	}*/
 	void PrintAll(/*Surf game*/) {
 		x = sec % 10;
+		//numbers.setPosition(SCREEN_WIDTH / 2 - size / 2 - size, 61);
+		numbers.show_with_shift_x(SCREEN_WIDTH / 2 + size / 2 + size, x);
+
 		//numbers.show_with_shift_x()
 		//texture_of_number.x = SCREEN_WIDTH - size * 2;
 		////showPic(game, texture_of_number, NUMBERS, x);
 		//game.showPic(game.GetNumber(x), texture_of_number);
 
 		y = (sec / 10);
+		numbers.show_with_shift_x(SCREEN_WIDTH / 2 + size / 2, y);
 		//texture_of_number.x -= size;
 		////showPic(game, texture_of_number, NUMBERS, y);
 		//game.showPic(game.GetNumber(y), texture_of_number);
 
+		numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2, Number_sprite::TWO_DOT);
 		//texture_of_number.x -= size;
 		////showPic(game, texture_of_number, NUMBERS, 10);
 		//game.showPic(game.GetNumber(10), texture_of_number);
 
 		z = min % 10;
+		numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2 - size, z);
 		//texture_of_number.x -= size;
 		////showPic(game, texture_of_number, NUMBERS, z);
 		//game.showPic(game.GetNumber(z), texture_of_number);
 
 		w = (min / 10);
+		numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2 - size * 2, w);
 		//texture_of_number.x -= size;
 		////showPic(game, texture_of_number, NUMBERS, w);
 		//game.showPic(game.GetNumber(w), texture_of_number);
 
 	}
-	void timeGo(/*Surf& game*/) {
-
+	void timeGo() {
+		loadNumb();
 		Converter();
-		PrintAll(/*game*/);
+		PrintAll();
 		while (!stop_timer)
 		{
 
@@ -550,6 +564,7 @@ public:
 				sec = 0;
 				x = 0; y = 0;
 				z = min % 10;
+				//numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2 - size , z);
 				//if (min - 1 >= 0) {
 				//	min--;
 				//	sec = 60;
@@ -562,11 +577,11 @@ public:
 				//		//texture_of_number.x = SCREEN_WIDTH - size * 6;
 				//		//showPic(game, texture_of_number, NUMBERS, w);
 				//		//game.showPic(game.GetNumber(w), texture_of_number);
-
 				//	}
 				//}
 				if ((min / 10) - 1 >= 0) {
 					w = (min / 10);
+					//numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2 - size * 2, w);
 					//texture_of_number.x = SCREEN_WIDTH/2 - size/2 - size * 2;
 					//showPic(game, texture_of_number, NUMBERS, w);
 					//game.showPic(game.GetNumber(w), texture_of_number);
@@ -585,8 +600,10 @@ public:
 			//}
 			if (x + 1 == 10) {
 				y++;
+				//numbers.show_with_shift_x(SCREEN_WIDTH / 2 + size / 2, y);
 			}
 			x = sec % 10;
+			//numbers.show_with_shift_x(SCREEN_WIDTH / 2 + size / 2 + size, x);
 			//texture_of_number.x = SCREEN_WIDTH - size * 2;
 			//showPic(game, texture_of_number, NUMBERS, x);
 			//game.showPic(game.GetNumber(x), texture_of_number);
@@ -595,8 +612,10 @@ public:
 				stop_timer = true;
 				return;
 			}*/
-
+			PrintAll();
 			this_thread::sleep_for(chrono::milliseconds(1000));
+
+
 		}
 	}
 
@@ -1510,6 +1529,7 @@ public:
 	void RenderBG()
 	{
 		field_texture.render(0, 0);
+		
 	}
 
 	void render()
@@ -1653,6 +1673,7 @@ public:
 		loadButton();
 		RenderBG();
 		render();
+		SDL_RenderPresent(gRenderer);
 		bool quit = false;
 		SDL_Event e;
 
@@ -1696,11 +1717,14 @@ public:
 			}
 			if (event == LButtonSprite::BUTTON_SPRITE_MOUSE_DOWN)
 			{
+
 				back.render();
+				stop_timer = true;
 				SDL_RenderPresent(gRenderer);
 				SDL_Delay(200);
 				if (is_exit(e))
 					return Window::GAME_WIND;
+				stop_timer = false;
 				RenderBG();
 				render();
 				SDL_RenderPresent(gRenderer);
@@ -1772,7 +1796,7 @@ public:
 
 				}
 
-				SDL_RenderClear(gRenderer);
+				//SDL_RenderClear(gRenderer);
 				RenderBG();
 				render();
 				//back.render();
