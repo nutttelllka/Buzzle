@@ -1445,7 +1445,7 @@ private:
 	int MARGIN;
 	PuzzlePiece** Puzzlepieces;
 	Slot** Slots;
-
+	LButton back;
 public:
 	//Initializes internal variables
 	Puzzle(int level)
@@ -1469,7 +1469,9 @@ public:
 			break;
 		}
 		MARGIN = 10;
-
+		back.setPosition(85, 30);
+		back.setWidth(106);
+		back.setHeight(113);
 		loadPuzzle();
 		Load_Bg();
 	}
@@ -1484,6 +1486,7 @@ public:
 		{
 			delete[] Slots[i];
 		}
+		
 	}
 
 	void Load_Bg()
@@ -1511,6 +1514,9 @@ public:
 
 	void render()
 	{
+
+		back.render();
+
 		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
 		{
 			for (int j = 0; j < PUZZLEPIECES_HOR; j++)
@@ -1586,7 +1592,15 @@ public:
 		}
 		return true;
 	}
-
+	bool loadButton()
+	{
+		bool success = true;
+		if (!back.loadButton("img\\Gameplay\\Back.png"))
+		{
+			success = false;
+		}
+		return success;
+	}
 	bool AllSlotsFilled()
 	{
 		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
@@ -1636,7 +1650,9 @@ public:
 
 	int Game()
 	{
+		loadButton();
 		RenderBG();
+		render();
 		bool quit = false;
 		SDL_Event e;
 
@@ -1647,6 +1663,8 @@ public:
 		thread th(&Timer::timeGo, ref(timer));//ref - используется 
 		th.detach();
 		stop_timer = false;
+
+		int event = LButtonSprite::BUTTON_SPRITE_MOUSE_OUT;
 		while (!quit)
 		{
 			//Handle events on queue
@@ -1657,11 +1675,44 @@ public:
 				if (x_or_esc_is_pressed(e))
 				{
 					stop_timer = true;
-					if (is_exit( e))
+					if (is_exit(e))
 						return CLOSE_GAME;
 					RenderBG();
+					//render();
+					back.render();
 					stop_timer = false;
 				}
+				
+				//Handlling events on slots and puzzlepoieces
+				for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+				{
+					for (int j = 0; j < PUZZLEPIECES_HOR; j++)
+					{
+						Slots[i][j].handleEvent(&e);
+						Puzzlepieces[i][j].handleEvent(&e, &selected_puzzlepiece, &selected_slot);
+					}
+				}
+				event = back.handleEvent(&e);
+			}
+			if (event == LButtonSprite::BUTTON_SPRITE_MOUSE_DOWN)
+			{
+				back.render();
+				SDL_RenderPresent(gRenderer);
+				SDL_Delay(200);
+				if (is_exit(e))
+					return Window::GAME_WIND;
+				RenderBG();
+				render();
+				SDL_RenderPresent(gRenderer);
+			}
+			else if (event == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION
+				|| event == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT)
+			{
+				//SDL_RenderClear(gRenderer);
+				RenderBG();
+				render();
+				SDL_RenderPresent(gRenderer);
+			}
 				//Finding a selected slot
 				for (int i = 0; i < PUZZLEPIECES_VERT; i++)
 				{
@@ -1676,6 +1727,7 @@ public:
 						}
 					}
 				}
+
 				//Updating selected puzzlepiece
 				for (int i = 0; i < PUZZLEPIECES_VERT; i++)
 				{
@@ -1690,21 +1742,26 @@ public:
 						}
 					}
 				}
-				//Handlling events on slots and puzzlepoieces
-				for (int i = 0; i < PUZZLEPIECES_VERT; i++)
-				{
-					for (int j = 0; j < PUZZLEPIECES_HOR; j++)
-					{
-						Slots[i][j].handleEvent(&e);
-						Puzzlepieces[i][j].handleEvent(&e, &selected_puzzlepiece, &selected_slot);
-					}
-				}
-
+				
 				if (AllSlotsFilled())
 				{
 					if (IsOrderCorrect())
 					{
 						cout << "Kruto\n";
+						switch (level)
+						{
+						case 1:
+							return Window::LEVEL2_WIND;
+							break;
+						case 2:
+							return Window::LEVEL3_WIND;
+							break;
+						case 3:
+							return Window::GAME_WIND;
+							break;
+						default:
+							break;
+						}
 						quit = true;
 					}
 					else
@@ -1715,13 +1772,14 @@ public:
 
 				}
 
+				SDL_RenderClear(gRenderer);
+				RenderBG();
+				render();
+				//back.render();
+				SDL_Delay(100);
 			}
-			SDL_RenderClear(gRenderer);
-			RenderBG();
-			render();
-			SDL_Delay(100);
 			//Update screen
 			SDL_RenderPresent(gRenderer);
-		}
+		
 	}
 };
