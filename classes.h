@@ -629,6 +629,47 @@ public:
 	}
 
 };
+class File
+{
+	string path ;
+	
+public:
+
+	File():File("level.txt", "2")
+	{
+
+	}
+	File(string path, string to_write)
+	{
+		this->path = path;
+		rewrite_in_file(to_write);
+	}
+	void rewrite_in_file(string to_write)
+	{
+		ofstream myfile(path);
+		if (myfile.is_open())
+		{
+			myfile << to_write;
+			myfile.close();
+		}
+		else
+			cout << "couldn't open file\n";
+	}
+	string inf_from_file()
+	{
+		string in_file;
+		ifstream myfile(path);
+		if (myfile.is_open())
+		{
+			myfile >> in_file;
+			myfile.close();
+			cout << in_file;
+		}
+		else
+			cout << "couldn't open file\n";
+	return in_file;
+	}
+};
 class CurrentWindow abstract
 {
 protected:
@@ -746,7 +787,9 @@ public:
 					button[i].SetMCurrentSprite(LButtonSprite::BUTTON_SPRITE_MOUSE_OUT);
 					return SelectedButtonInCurrentWindow(i);
 				}
-				else if (event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION || event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT)
+				else if (event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION 
+					//|| event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT
+					)
 				{
 					//SDL_RenderClear(gRenderer);
 					texture_bg.renderP();
@@ -948,6 +991,7 @@ public:
 class Gallery : public CurrentWindow
 {
 private:
+	File level_in_file;
 	Picture pictures[COUNT_OF_PIC];
 	static int selected_pic;
 public:
@@ -964,6 +1008,7 @@ public:
 	bool LoadButton()override
 	{
 		bool success = true;
+
 		if (!button[NEXT].loadButton("img\\Buttons Gallery\\next.png"))
 		{
 			success = false;
@@ -974,10 +1019,49 @@ public:
 		}
 		return success;
 	}
+	int level()
+	{
+		return stoi(level_in_file.inf_from_file());
+	}
+	bool picture_is_open(int picture)
+	{
+		if (level() > picture)
+			return true;
+		else
+			return false;
+	}
+	string getPathOfSelectedPic(int level,bool open)
+	{
+		string path;
+		switch (level)
+		{
+		case Pictures::FIRST:
+			if (open)
+			{
+				return "img\\Gallery\\1opened.png";
+			}
+			else
+				return "img\\Gallery\\1not_opened.png";
+		case Pictures::SECOND:
+			if (open)
+			{
+				return "img\\Gallery\\2opened.png";
+			}
+			else
+				return "img\\Gallery\\2not_opened.png";
+		case Pictures::THIRD:
+			if (open)
+			{
+				return "img\\Gallery\\3opened.png";
+			}
+			else
+				return "img\\Gallery\\3not_opened.png";
+		}
+	}
 	bool LoadBg()override
 	{
 		bool success = true;
-		if (!texture_bg.loadFromFile("img\\Gallery\\1 not_opened.png"))
+		if (!texture_bg.loadFromFile(getPathOfSelectedPic(selected_pic, picture_is_open(selected_pic))))
 		{
 			success = false;
 		}
@@ -986,6 +1070,7 @@ public:
 	bool Load_Pics()
 	{
 		bool success = true;
+
 		if (!pictures[FIRST].loadFromFile("img\\Gallery\\1 not_opened.png"))
 		{
 			success = false;
@@ -998,6 +1083,28 @@ public:
 		{
 			success = false;
 		}
+		if(level() >= Pictures::SECOND)
+		{
+			if (!pictures[FIRST].loadFromFile("img\\Gallery\\1opened.png"))
+			{
+				success = false;
+			}
+		}
+		else if (level() >= Pictures::THIRD)
+		{
+			if (!pictures[SECOND].loadFromFile("img\\Gallery\\1opened.png"))
+			{
+				success = false;
+			}
+		}
+		else if (level() > Pictures::THIRD)
+		{
+			if (!pictures[THIRD].loadFromFile("img\\Gallery\\1opened.png"))
+			{
+				success = false;
+			}
+		}
+		
 		return success;
 	}
 	int SelectedButtonInCurrentWindow(int button)override
@@ -1008,6 +1115,7 @@ public:
 			switch (selected_pic)
 			{
 			case FIRST:
+
 				selected_pic = FIRST;
 				return Window::MENU_WIND;
 				break;
@@ -1025,11 +1133,9 @@ public:
 			case SECOND:
 				selected_pic++;
 				return GALLERY_WIND;
-				break;
 			case THIRD:
 				selected_pic = FIRST;
 				return Window::MENU_WIND;
-				break;
 			}
 			break;
 		case EXIT_WIND:
@@ -1730,7 +1836,8 @@ public:
 				SDL_RenderPresent(gRenderer);
 			}
 			else if (event == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION
-				|| event == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT)
+				//|| event == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT
+				)
 			{
 				//SDL_RenderClear(gRenderer);
 				RenderBG();
