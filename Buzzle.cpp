@@ -12,9 +12,10 @@ int main(int argc, char* args[])
 	{
 		
 		
+		Menu m;
+		Gallery g(74, 374, 1214, 252, 138);
+		LevelSelection l(535, 429, 124, 107, 430);
 
-		//Puzzle pzz2(2);
-		//Puzzle pzz3(3);
 		//Load media
 		if (//!m.LoadButton() ||
 			//!l.LoadButton() ||
@@ -31,6 +32,9 @@ int main(int argc, char* args[])
 			CreateThread(0, 0, Intro, 0, 0, 0);
 			SDL_Delay(3000);
 
+			Puzzle pzz1(1);
+			Puzzle pzz2(2);
+			Puzzle pzz3(3);
 			int window_click = Window::MENU_WIND;
 			//int wind_to_return = Window::MENU_WIND;
 			while (window_click != Window::CLOSE_GAME)
@@ -77,7 +81,7 @@ int main(int argc, char* args[])
 				//	Exit e;
 				//	window_click = e.click_window();
 				//}
-				/*switch (window_click)
+				switch (window_click)
 				{
 				case Window::MENU_WIND:
 
@@ -112,7 +116,7 @@ int main(int argc, char* args[])
 					//e.SetSelectedWindow(wind_to_return);
 					window_click = e.click_window();
 					break;
-				}*/
+				}
 
 			}
 		}
