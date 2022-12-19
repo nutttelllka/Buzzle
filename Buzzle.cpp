@@ -35,48 +35,48 @@ int main(int argc, char* args[])
 			//int wind_to_return = Window::MENU_WIND;
 			while (window_click != Window::CLOSE_GAME)
 			{
-				if (window_click == Window::MENU_WIND)
-				{
-					//wind_to_return = MENU_WIND;
-					Menu m;
-					window_click = m.click_window();
-				}
-				else if (window_click == Window::GALLERY_WIND)
-				{
-					//wind_to_return  = MENU_WIND;
-					Gallery g(74, 374, 1214, 252, 138);
-					window_click = g.click_window();
-				}
+				//if (window_click == Window::MENU_WIND)
+				//{
+				//	//wind_to_return = MENU_WIND;
+				//	Menu m;
+				//	window_click = m.click_window();
+				//}
+				//else if (window_click == Window::GALLERY_WIND)
+				//{
+				//	//wind_to_return  = MENU_WIND;
+				//	Gallery g(74, 374, 1214, 252, 138);
+				//	window_click = g.click_window();
+				//}
 
-				else if (window_click == Window::GAME_WIND)
-				{
-					//wind_to_return = GAME_WIND;
-					LevelSelection l(535, 429, 124, 107, 430);
-					window_click = l.click_window();
-				}
-				else if (window_click == LEVEL1_WIND)
-				{
-					Puzzle pzz1(1);
-					//wind_to_return = LEVEL1_WIND;
-					window_click = pzz1.Game();
-				}
-				else if (window_click == Window::LEVEL2_WIND)
-				{
-					Puzzle pzz2(2);
-					//wind_to_return = LEVEL2_WIND;
-					window_click = pzz2.Game();
-				}
-				else if (window_click == Window::LEVEL3_WIND)
-				{
-					Puzzle pzz3(3);
-					//wind_to_return = LEVEL3_WIND;
-					window_click = pzz3.Game();
-				}
-				else if (window_click == Window::EXIT_WIND)
-				{
-					Exit e;
-					window_click = e.click_window();
-				}
+				//else if (window_click == Window::GAME_WIND)
+				//{
+				//	//wind_to_return = GAME_WIND;
+				//	LevelSelection l(535, 429, 124, 107, 430);
+				//	window_click = l.click_window();
+				//}
+				//else if (window_click == LEVEL1_WIND)
+				//{
+				//	Puzzle pzz1(1);
+				//	//wind_to_return = LEVEL1_WIND;
+				//	window_click = pzz1.Game();
+				//}
+				//else if (window_click == Window::LEVEL2_WIND)
+				//{
+				//	Puzzle pzz2(2);
+				//	//wind_to_return = LEVEL2_WIND;
+				//	window_click = pzz2.Game();
+				//}
+				//else if (window_click == Window::LEVEL3_WIND)
+				//{
+				//	Puzzle pzz3(3);
+				//	//wind_to_return = LEVEL3_WIND;
+				//	window_click = pzz3.Game();
+				//}
+				//else if (window_click == Window::EXIT_WIND)
+				//{
+				//	Exit e;
+				//	window_click = e.click_window();
+				//}
 				/*switch (window_click)
 				{
 				case Window::MENU_WIND:
