@@ -681,7 +681,7 @@ class File
 	
 public:
 
-	File():File("level.txt", "0")
+	File():File("level.txt", "1")
 	{
 
 	}
@@ -1059,12 +1059,12 @@ public:
 		{
 			success = false;
 		}
-		if (!button[LEVEL2].loadButtonWithOrNotClip(getPathOfSelectedButton(LEVEL2, level_is_open(LEVEL2))))
+		if (!button[LEVEL2].loadButtonWithOrNotClip(getPathOfSelectedButton(LEVEL2, level_is_open(LEVEL2-1))))
 		{
 			success = false;
 		}
 		if (!button[LEVEL3].loadButtonWithOrNotClip
-		(getPathOfSelectedButton(LEVEL3, level_is_open(LEVEL3))))
+		(getPathOfSelectedButton(LEVEL3, level_is_open(LEVEL3-1))))
 		{
 			success = false;
 		}
@@ -1697,8 +1697,7 @@ public:
 		back.setPosition(85, 30);
 		back.setWidth(106);
 		back.setHeight(113);
-		loadPuzzle();
-		Load_Bg();
+		
 	}
 
 	~Puzzle()
@@ -1876,6 +1875,8 @@ public:
 
 	int Game()
 	{
+		loadPuzzle();
+		Load_Bg();
 		loadButton();
 		RenderBG();
 		render();
@@ -1940,9 +1941,9 @@ public:
 				)
 			{
 				//SDL_RenderClear(gRenderer);
-				RenderBG();
+				//RenderBG();
 				render();
-				SDL_RenderPresent(gRenderer);
+				//SDL_RenderPresent(gRenderer);
 			}
 				//Finding a selected slot
 				for (int i = 0; i < PUZZLEPIECES_VERT; i++)
