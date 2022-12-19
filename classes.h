@@ -241,6 +241,7 @@ private:
 	LTexture gButtonSpriteSheetTexture;
 	int height;
 	int width;
+	bool is_clicked = true;
 public:
 	//Initializes internal variables
 	LButton() :LButton(BUTTON_WIDTH, BUTTON_HEIGHT, 0, 0)
@@ -253,7 +254,10 @@ public:
 		setPosition(x, y);
 		mCurrentSprite = BUTTON_SPRITE_MOUSE_OUT;
 	}
-
+	void SetBlock(bool is_clicked)
+	{
+		this->is_clicked = is_clicked;
+	}
 	/// <summary>
 	/// Sets top left position
 	/// </summary>
@@ -289,51 +293,54 @@ public:
 	{
 		int button_sprite = BUTTON_SPRITE_MOUSE_OUT;
 		//If mouse event happened
-		if (e->type == SDL_MOUSEMOTION || e->type == SDL_MOUSEBUTTONDOWN || e->type == SDL_MOUSEBUTTONUP || e->type == SDL_KEYDOWN)
+		if (is_clicked)
 		{
-			//Get mouse position
-			int x, y;
-			SDL_GetMouseState(&x, &y);
-
-			//Check if mouse is in button
-			bool inside = true;
-
-			//Mouse is left of the button
-			if (x < mPosition.x
-				|| x > mPosition.x + width
-				|| y < mPosition.y
-				|| y > mPosition.y + height)
-				inside = false;
-
-			//Mouse is outside button
-			if (!inside)
+			if (e->type == SDL_MOUSEMOTION || e->type == SDL_MOUSEBUTTONDOWN || e->type == SDL_MOUSEBUTTONUP || e->type == SDL_KEYDOWN)
 			{
-				mCurrentSprite = BUTTON_SPRITE_MOUSE_OUT;
-				button_sprite = BUTTON_SPRITE_MOUSE_OUT;
-			}
-			//Mouse is inside button
-			else
-			{
-				//Set mouse over sprite
-				switch (e->type)
+				//Get mouse position
+				int x, y;
+				SDL_GetMouseState(&x, &y);
+
+				//Check if mouse is in button
+				bool inside = true;
+
+				//Mouse is left of the button
+				if (x < mPosition.x
+					|| x > mPosition.x + width
+					|| y < mPosition.y
+					|| y > mPosition.y + height)
+					inside = false;
+
+				//Mouse is outside button
+				if (!inside)
 				{
-				case SDL_MOUSEMOTION:
-					mCurrentSprite = BUTTON_SPRITE_MOUSE_OVER_MOTION;
-					button_sprite = BUTTON_SPRITE_MOUSE_OVER_MOTION;
-					break;
-
-				case SDL_MOUSEBUTTONDOWN:
-					mCurrentSprite = BUTTON_SPRITE_MOUSE_DOWN;
-					button_sprite = BUTTON_SPRITE_MOUSE_DOWN;
-					break;
-
-				case SDL_MOUSEBUTTONUP:
-					mCurrentSprite = BUTTON_SPRITE_MOUSE_UP;
-					button_sprite = BUTTON_SPRITE_MOUSE_UP;
-					break;
+					mCurrentSprite = BUTTON_SPRITE_MOUSE_OUT;
+					button_sprite = BUTTON_SPRITE_MOUSE_OUT;
 				}
-			}
+				//Mouse is inside button
+				else
+				{
+					//Set mouse over sprite
+					switch (e->type)
+					{
+					case SDL_MOUSEMOTION:
+						mCurrentSprite = BUTTON_SPRITE_MOUSE_OVER_MOTION;
+						button_sprite = BUTTON_SPRITE_MOUSE_OVER_MOTION;
+						break;
 
+					case SDL_MOUSEBUTTONDOWN:
+						mCurrentSprite = BUTTON_SPRITE_MOUSE_DOWN;
+						button_sprite = BUTTON_SPRITE_MOUSE_DOWN;
+						break;
+
+					case SDL_MOUSEBUTTONUP:
+						mCurrentSprite = BUTTON_SPRITE_MOUSE_UP;
+						button_sprite = BUTTON_SPRITE_MOUSE_UP;
+						break;
+					}
+				}
+
+			}
 		}
 		return button_sprite;
 	}
@@ -381,7 +388,46 @@ public:
 
 		return success;
 	}
+	bool loadButtonWithOrNotClip(string link)
+	{
+		//Loading success flag
+		bool success = true;
 
+		//Load sprites
+		if (!gButtonSpriteSheetTexture.loadFromFile(link))
+		{
+			printf("Failed to load button sprite texture!\n");
+			success = false;
+		}
+		else
+		{
+			if (!is_clicked)
+			{
+				//Set sprites
+				for (int i = 0; i < BUTTON_SPRITE_TOTAL; ++i)
+				{
+					gSpriteClips[i].x = 0;
+					gSpriteClips[i].y = 0;
+					gSpriteClips[i].w = width;
+					gSpriteClips[i].h = height;
+				}
+				
+			}
+			else
+			{
+				//Set sprites
+				for (int i = 0; i < BUTTON_SPRITE_TOTAL; ++i)
+				{
+					gSpriteClips[i].x = 0;
+					gSpriteClips[i].y = i * height;
+					gSpriteClips[i].w = width;
+					gSpriteClips[i].h = height;
+				}
+			}
+		}
+
+		return success;
+	}
 
 };
 class Cutting
@@ -629,6 +675,60 @@ public:
 	}
 
 };
+class File
+{
+	string path ;
+	
+public:
+
+	File():File("level.txt", "1")
+	{
+
+	}
+	File(string path, string to_write)
+	{
+		this->path = path;
+		rewrite_in_file(to_write);
+	}
+	void rewrite_in_file(string to_write)
+	{
+		ofstream myfile(path);
+		if (myfile.is_open())
+		{
+			myfile << to_write;
+			myfile.close();
+		}
+		else
+			cout << "couldn't open file\n";
+	}
+	void rewrite_in_file_num(int num)
+	{
+		stringstream stream;
+		stream << num;
+		string str;
+		stream >> str;
+		rewrite_in_file(str);
+
+	}
+	string inf_from_file()
+	{
+		string in_file;
+		ifstream myfile(path);
+		if (myfile.is_open())
+		{
+			myfile >> in_file;
+			myfile.close();
+			cout << in_file;
+		}
+		else
+			cout << "couldn't open file\n";
+	return in_file;
+	}
+	int num_from_file()
+	{
+		return stoi(inf_from_file());
+	}
+};
 class CurrentWindow abstract
 {
 protected:
@@ -706,6 +806,11 @@ public:
 			event_buttons.push_back(0);
 		}
 		bool quit = false;
+		vector <int> previos_click;
+			for (int i = 0; i < count_of_but; i++)
+			{
+				previos_click.push_back(LButtonSprite::BUTTON_SPRITE_MOUSE_OUT);
+			}
 		SDL_Event e;
 		Show_window();
 		while (!quit)
@@ -730,10 +835,10 @@ public:
 			{
 				if (event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_DOWN)
 				{
-					for (int i = 0; i < count_of_but; i++)
-					{
+					//for (int i = 0; i < count_of_but; i++)
+					//{
 						button[i].render();
-					}
+					//}
 					SDL_RenderPresent(gRenderer);
 					SDL_Delay(200);
 					//SDL_RenderClear(gRenderer);
@@ -746,15 +851,23 @@ public:
 					button[i].SetMCurrentSprite(LButtonSprite::BUTTON_SPRITE_MOUSE_OUT);
 					return SelectedButtonInCurrentWindow(i);
 				}
-				else if (event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION || event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT)
+				else if (event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION 
+					//|| event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT
+					)
 				{
 					//SDL_RenderClear(gRenderer);
-					texture_bg.renderP();
+					//texture_bg.renderP();
 
-					for (int i = 0; i < count_of_but; i++)
-					{
+					//for (int i = 0; i < count_of_but; i++)
+					//{
 						button[i].render();
-					}
+					//}
+						previos_click[i] = LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION;
+				}
+				else if (event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT 
+					&& previos_click[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION)
+				{
+						button[i].render();
 				}
 			}
 			//Update screen
@@ -838,6 +951,18 @@ public:
 
 };
 int Exit::count_of_wind = 0;
+int level()
+{
+	File level_in_file;
+	return stoi(level_in_file.inf_from_file());
+}
+bool level_is_open(int current_level)
+{
+	if (level() > current_level)
+		return true;
+	else
+		return false;
+}
 class Menu : public CurrentWindow
 {
 public:
@@ -900,6 +1025,33 @@ public:
 	{
 
 	}
+	string getPathOfSelectedButton(int level, bool open)
+	{
+		string path;
+		button[level].SetBlock(open);
+		switch (level)
+		{
+		case LEVEL1:
+				return "img\\Level\\Level1.png";
+		case LEVEL2:
+			if (open)
+			{
+				return "img\\Level\\Level2.png";
+			}
+			else
+			{
+				
+				return "img\\Level\\Block.png";
+			}
+		case LEVEL3:
+			if (open)
+			{
+				return "img\\Level\\Level3.png";
+			}
+			else
+				return "img\\Level\\Block.png";
+		}
+	}
 	bool LoadButton()override
 	{
 		bool success = true;
@@ -907,11 +1059,12 @@ public:
 		{
 			success = false;
 		}
-		if (!button[LEVEL2].loadButton("img\\Level\\Level2.png"))
+		if (!button[LEVEL2].loadButtonWithOrNotClip(getPathOfSelectedButton(LEVEL2, level_is_open(LEVEL2-1))))
 		{
 			success = false;
 		}
-		if (!button[LEVEL3].loadButton("img\\Level\\Level3.png"))
+		if (!button[LEVEL3].loadButtonWithOrNotClip
+		(getPathOfSelectedButton(LEVEL3, level_is_open(LEVEL3-1))))
 		{
 			success = false;
 		}
@@ -948,6 +1101,7 @@ public:
 class Gallery : public CurrentWindow
 {
 private:
+	//File level_in_file;
 	Picture pictures[COUNT_OF_PIC];
 	static int selected_pic;
 public:
@@ -964,6 +1118,7 @@ public:
 	bool LoadButton()override
 	{
 		bool success = true;
+
 		if (!button[NEXT].loadButton("img\\Buttons Gallery\\next.png"))
 		{
 			success = false;
@@ -974,10 +1129,39 @@ public:
 		}
 		return success;
 	}
+
+	string getPathOfSelectedPic(int level,bool open)
+	{
+		string path;
+		switch (level)
+		{
+		case Pictures::FIRST:
+			if (open)
+			{
+				return "img\\Gallery\\1opened.png";
+			}
+			else
+				return "img\\Gallery\\1not_opened.png";
+		case Pictures::SECOND:
+			if (open)
+			{
+				return "img\\Gallery\\2opened.png";
+			}
+			else
+				return "img\\Gallery\\2not_opened.png";
+		case Pictures::THIRD:
+			if (open)
+			{
+				return "img\\Gallery\\3opened.png";
+			}
+			else
+				return "img\\Gallery\\3not_opened.png";
+		}
+	}
 	bool LoadBg()override
 	{
 		bool success = true;
-		if (!texture_bg.loadFromFile("img\\Gallery\\1 not_opened.png"))
+		if (!texture_bg.loadFromFile(getPathOfSelectedPic(selected_pic, level_is_open(selected_pic))))
 		{
 			success = false;
 		}
@@ -986,6 +1170,7 @@ public:
 	bool Load_Pics()
 	{
 		bool success = true;
+
 		if (!pictures[FIRST].loadFromFile("img\\Gallery\\1 not_opened.png"))
 		{
 			success = false;
@@ -998,6 +1183,28 @@ public:
 		{
 			success = false;
 		}
+		if(level() >= Pictures::SECOND)
+		{
+			if (!pictures[FIRST].loadFromFile("img\\Gallery\\1opened.png"))
+			{
+				success = false;
+			}
+		}
+		else if (level() >= Pictures::THIRD)
+		{
+			if (!pictures[SECOND].loadFromFile("img\\Gallery\\1opened.png"))
+			{
+				success = false;
+			}
+		}
+		else if (level() > Pictures::THIRD)
+		{
+			if (!pictures[THIRD].loadFromFile("img\\Gallery\\1opened.png"))
+			{
+				success = false;
+			}
+		}
+		
 		return success;
 	}
 	int SelectedButtonInCurrentWindow(int button)override
@@ -1008,6 +1215,7 @@ public:
 			switch (selected_pic)
 			{
 			case FIRST:
+
 				selected_pic = FIRST;
 				return Window::MENU_WIND;
 				break;
@@ -1025,11 +1233,9 @@ public:
 			case SECOND:
 				selected_pic++;
 				return GALLERY_WIND;
-				break;
 			case THIRD:
 				selected_pic = FIRST;
 				return Window::MENU_WIND;
-				break;
 			}
 			break;
 		case EXIT_WIND:
@@ -1491,8 +1697,7 @@ public:
 		back.setPosition(85, 30);
 		back.setWidth(106);
 		back.setHeight(113);
-		loadPuzzle();
-		Load_Bg();
+		
 	}
 
 	~Puzzle()
@@ -1670,6 +1875,8 @@ public:
 
 	int Game()
 	{
+		loadPuzzle();
+		Load_Bg();
 		loadButton();
 		RenderBG();
 		render();
@@ -1730,12 +1937,13 @@ public:
 				SDL_RenderPresent(gRenderer);
 			}
 			else if (event == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION
-				|| event == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT)
+				//|| event == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT
+				)
 			{
 				//SDL_RenderClear(gRenderer);
-				RenderBG();
+				//RenderBG();
 				render();
-				SDL_RenderPresent(gRenderer);
+				//SDL_RenderPresent(gRenderer);
 			}
 				//Finding a selected slot
 				for (int i = 0; i < PUZZLEPIECES_VERT; i++)
@@ -1771,6 +1979,10 @@ public:
 				{
 					if (IsOrderCorrect())
 					{
+						File current_level_f;
+						int current_lev = current_level_f.num_from_file();
+						current_lev++;
+						current_level_f.rewrite_in_file_num(current_lev);
 						cout << "Kruto\n";
 						switch (level)
 						{
