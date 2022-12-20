@@ -144,7 +144,7 @@ bool loadMedia()
 	}
 	return success;
 }
-bool stop_timer = false;
+bool stop_timer = true;
 DWORD WINAPI Intro(void* param)
 {
 	//Clear screen
@@ -779,8 +779,10 @@ public:
 			//Handle events on queue
 			while (SDL_PollEvent(&e) != 0)
 			{
+				stop_timer = true;
 				if (x_or_esc_is_pressed(e))
 				{
+
 					if (is_exit(e))
 						return CLOSE_GAME;
 					Show_window();
@@ -1877,9 +1879,10 @@ public:
 		PuzzlePiece* selected_puzzlepiece = nullptr;
 		Timer timer;
 		timer.loadNumb();
+		stop_timer = false;
 		thread th(&Timer::timeGo, ref(timer));//ref - используется 
 		th.detach();
-		stop_timer = false;
+		
 
 		int event = LButtonSprite::BUTTON_SPRITE_MOUSE_OUT;
 		bool pzz_event = false; // any puzzlepieces events flag (selection, moving, etc)

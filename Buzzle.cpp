@@ -2,6 +2,7 @@
 //using namespace std;
 int level_game(int window_click)
 {
+	stop_timer = true;
 	if (window_click == LEVEL1_WIND)
 	{
 		Puzzle pzz1(1);
@@ -20,6 +21,7 @@ int level_game(int window_click)
 		//wind_to_return = LEVEL3_WIND;
 		window_click = pzz3.Game();
 	}
+	stop_timer = true;
 	return window_click;
 }
 int main(int argc, char* args[])
