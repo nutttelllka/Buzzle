@@ -1668,8 +1668,10 @@ private:
 	int PUZZLEPIECES_HOR;
 	int PUZZLEPIECES_VERT;
 	int MARGIN;
-	PuzzlePiece** Puzzlepieces;
-	Slot** Slots;
+	vector <vector <PuzzlePiece>> Puzzlepieces;
+	vector <vector <Slot>> Slots;
+	//PuzzlePiece** Puzzlepieces;
+	//Slot** Slots;
 	LButton back;
 public:
 	//Initializes internal variables
@@ -1697,20 +1699,28 @@ public:
 		back.setPosition(85, 30);
 		back.setWidth(106);
 		back.setHeight(113);
-		
-	}
-
-	~Puzzle()
-	{
+		// Initializing puzzlepieces 2d vector 
 		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
 		{
-			delete[] Puzzlepieces[i];
+			vector <PuzzlePiece> pzz;
+			Puzzlepieces.push_back(pzz);
+			for (int j = 0; j < PUZZLEPIECES_HOR; j++)
+			{
+				PuzzlePiece p;
+				Puzzlepieces[i].push_back(p);
+			}
 		}
+		// Initializing slots 2d vector
 		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
 		{
-			delete[] Slots[i];
+			vector <Slot> sl;
+			Slots.push_back(sl);
+			for (int j = 0; j < PUZZLEPIECES_HOR; j++)
+			{
+				Slot s;
+				Slots[i].push_back(s);
+			}
 		}
-		
 	}
 
 	void Load_Bg()
@@ -1785,18 +1795,6 @@ public:
 		default:
 			break;
 		}
-		// Initializing puzzlepieces dynamic 2d array
-		Puzzlepieces = new PuzzlePiece * [PUZZLEPIECES_VERT];
-		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
-		{
-			Puzzlepieces[i] = new PuzzlePiece[PUZZLEPIECES_HOR];
-		}
-		// Initializing slots dynamic 2d array
-		Slots = new Slot * [PUZZLEPIECES_VERT];
-		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
-		{
-			Slots[i] = new Slot[PUZZLEPIECES_HOR];
-		}
 
 		for (int i = 0, number = 0; i < PUZZLEPIECES_VERT; i++)
 		{
@@ -1804,7 +1802,7 @@ public:
 			{
 				// Load puzzlepieces textures and set sprites
 				Puzzlepieces[i][j].setPuzzlepieceDimensions(width, height);
-				;				Puzzlepieces[i][j].loadPuzzlepiece(link);
+				Puzzlepieces[i][j].loadPuzzlepiece(link);
 				Puzzlepieces[i][j].Set_PuzzlepieceClip(j * Puzzlepieces[i][j].getPuzzlepieceWidth(), i * Puzzlepieces[i][j].getPuzzlepieceHeight(), Puzzlepieces[i][j].getPuzzlepieceWidth(), Puzzlepieces[i][j].getPuzzlepieceHeight());
 				Puzzlepieces[i][j].setNumber(number);
 				Puzzlepieces[i][j].setDefaultPosition(start_def_x + j * (Puzzlepieces[i][j].getPuzzlepieceWidth() + MARGIN), start_def_y + i * (Puzzlepieces[i][j].getPuzzlepieceHeight() + MARGIN));
@@ -1936,86 +1934,85 @@ public:
 				render();
 				SDL_RenderPresent(gRenderer);
 			}
-			else if (event == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION
-				//|| event == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT
-				)
+			else if (event == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION)
+				//|| event == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT)
 			{
 				//SDL_RenderClear(gRenderer);
 				//RenderBG();
 				render();
 				//SDL_RenderPresent(gRenderer);
 			}
-				//Finding a selected slot
-				for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+			//Finding a selected slot
+			for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+			{
+				for (int j = 0; j < PUZZLEPIECES_HOR; j++)
 				{
-					for (int j = 0; j < PUZZLEPIECES_HOR; j++)
+					if (Slots[i][j].IsSelected())
 					{
-						if (Slots[i][j].IsSelected())
-						{
-							selected_slot = &Slots[i][j];
-							cout << "Slot " << Slots[i][j].getNumber() << " selected\n";
-							i = PUZZLEPIECES_VERT;
-							break;
-						}
+						selected_slot = &Slots[i][j];
+						cout << "Slot " << Slots[i][j].getNumber() << " selected\n";
+						i = PUZZLEPIECES_VERT;
+						break;
 					}
 				}
-
-				//Updating selected puzzlepiece
-				for (int i = 0; i < PUZZLEPIECES_VERT; i++)
-				{
-					for (int j = 0; j < PUZZLEPIECES_HOR; j++)
-					{
-						if (Puzzlepieces[i][j].IsSelected())
-						{
-							selected_puzzlepiece = &Puzzlepieces[i][j];
-							Puzzlepieces[i][j].UpdatePosition(&selected_slot);
-							i = PUZZLEPIECES_VERT;
-							break;
-						}
-					}
-				}
-				
-				if (AllSlotsFilled())
-				{
-					if (IsOrderCorrect())
-					{
-						File current_level_f;
-						int current_lev = current_level_f.num_from_file();
-						current_lev++;
-						current_level_f.rewrite_in_file_num(current_lev);
-						cout << "Kruto\n";
-						switch (level)
-						{
-						case 1:
-							return Window::LEVEL2_WIND;
-							break;
-						case 2:
-							return Window::LEVEL3_WIND;
-							break;
-						case 3:
-							return Window::GAME_WIND;
-							break;
-						default:
-							break;
-						}
-						quit = true;
-					}
-					else
-					{
-						cout << "Ne kruto\n";
-						Reset(&selected_puzzlepiece, &selected_slot);
-					}
-
-				}
-
-				//SDL_RenderClear(gRenderer);
-				RenderBG();
-				render();
-				//back.render();
-				SDL_Delay(100);
 			}
-			//Update screen
-			SDL_RenderPresent(gRenderer);
+
+			//Updating selected puzzlepiece
+			for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+			{
+				for (int j = 0; j < PUZZLEPIECES_HOR; j++)
+				{
+					if (Puzzlepieces[i][j].IsSelected())
+					{
+						selected_puzzlepiece = &Puzzlepieces[i][j];
+						Puzzlepieces[i][j].UpdatePosition(&selected_slot);
+						i = PUZZLEPIECES_VERT;
+						break;
+					}
+				}
+			}
+			
+			if (AllSlotsFilled())
+			{
+				if (IsOrderCorrect())
+				{
+					File current_level_f;
+					int current_lev = current_level_f.num_from_file();
+					current_lev++;
+					current_level_f.rewrite_in_file_num(current_lev);
+					cout << "Kruto\n";
+					switch (level)
+					{
+					case 1:
+						return Window::LEVEL2_WIND;
+						break;
+					case 2:
+						return Window::LEVEL3_WIND;
+						break;
+					case 3:
+						return Window::GAME_WIND;
+						break;
+					default:
+						break;
+					}
+					quit = true;
+				}
+				else
+				{
+					cout << "Ne kruto\n";
+					Reset(&selected_puzzlepiece, &selected_slot);
+				}
+
+			}
+
+			//SDL_RenderClear(gRenderer);
+			RenderBG();
+			render();
+			//back.render();
+			SDL_Delay(100);
+		}
+		//Update screen
+		SDL_RenderPresent(gRenderer);
 		
 	}
 };
