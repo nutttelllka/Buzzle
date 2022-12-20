@@ -1990,7 +1990,11 @@ public:
 					}
 				}
 			}
-			
+			//Nuta Here is Exit, because timer is over.
+			if (timer.GetCountSec() == 0) 
+			{
+				return Window::GAME_WIND;
+			}
 			if (AllSlotsFilled())
 			{
 				if (IsOrderCorrect())
