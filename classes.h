@@ -254,15 +254,16 @@ public:
 		setPosition(x, y);
 		mCurrentSprite = BUTTON_SPRITE_MOUSE_OUT;
 	}
+
+	LTexture* getButtonSpriteSheetTexture()
+	{
+		return &gButtonSpriteSheetTexture;
+	}
+
 	void SetBlock(bool is_clicked)
 	{
 		this->is_clicked = is_clicked;
 	}
-	/// <summary>
-	/// Sets top left position
-	/// </summary>
-	/// <param name="x">X coordinate</param>
-	/// <param name="y">Y coordinate</param>
 
 	void SetMCurrentSprite(LButtonSprite sprite)
 	{
@@ -284,11 +285,7 @@ public:
 	{
 		this->width = width;
 	}
-	/// <summary>
-	/// Handles mouse event
-	/// </summary>
-	/// <param name="e">mouse event</param>
-	/// <returns>returns button sprite number</returns>
+
 	int handleEvent(SDL_Event* e)
 	{
 		int button_sprite = BUTTON_SPRITE_MOUSE_OUT;
@@ -430,260 +427,256 @@ public:
 	}
 
 };
-class Cutting
-{
-private:
-	//Top left position
-	SDL_Point Position;
-	LTexture pic;
-	//Currently used sprite
-	int CurrentSprite;
-	SDL_Rect sprite_clips[Number_sprite::COUNT_OF_DIG];
-	int height;
-	int width;
-public:
-	Cutting() :Cutting(WIDTH_OF_PIC, HEIGHT_OF_PIC, 0, 61)
-	{
-	}
-	Cutting(int width, int height, int x, int y)
-	{
-		setHeight(height);
-		setWidth(width);
-		setPosition(x, y);
-
-		CurrentSprite = ZERO;
-	}
-	void setHeight(int height)
-	{
-		this->height = height;
-	}
-	void setWidth(int width)
-	{
-		this->width = width;
-	}
-	void SetCurrentSprite(int CurrentSprite)
-	{
-		this->CurrentSprite = CurrentSprite;
-	}
-	/// <summary>
-	/// Sets top left position
-	/// </summary>
-	/// <param name="x">X coordinate</param>
-	/// <param name="y">Y coordinate</param>
-
-	void SetMCurrentSprite(Number_sprite sprite)
-	{
-		CurrentSprite = sprite;
-	}
-	void setPosition(int x, int y)
-	{
-		Position.x = x;
-		Position.y = y;
-	}
-	bool loadNumber(string link)
-	{
-		//Loading success flag
-		bool success = true;
-
-		//Load sprites
-		if (!pic.loadFromFile(link))
-		{
-			printf("Failed to load button sprite texture!\n");
-			success = false;
-		}
-		else
-		{
-			//Set sprites
-			for (int i = 0; i < Number_sprite::COUNT_OF_DIG; ++i)
-			{
-				sprite_clips[i].x = i * WIDTH_OF_PIC;
-				sprite_clips[i].y = 0;
-				sprite_clips[i].w = WIDTH_OF_PIC;
-				sprite_clips[i].h = HEIGHT_OF_PIC;
-			}
-		}
-
-		return success;
-	}
-	void show()
-	{
-		//current_pic.render_with_sprite(&sprite_clips[CurrentSprite]);
-	}
-	/*void show_with_shift_x(int x)
-	{
-		current_pic.render(x, current_pic.getY(),&sprite_clips[CurrentSprite]);
-	}*/
-	void show_with_shift_x(int x, int current_num)
-	{
-		CurrentSprite = current_num;
-		pic.render(x, Position.y, &sprite_clips[CurrentSprite]);
-		SDL_RenderPresent(gRenderer);
-	}
-};
-class Timer {
-	int size;
-	int min;//минуты
-	int sec;
-	int count_of_sec = 0;
-	int x = 0, y = 0, z = 0, w = 0; //изменение определенных цифр во времени
-	//Picture numbers[Number::COUNT_OF_DIG];
-	Cutting numbers;
-	//SDL_Rect texture_of_number;
-public:
-	Timer() : Timer(0, 30) {
-
-	}
-	Timer(int count_of_sec, int width_of_numb) {
-		this->count_of_sec = count_of_sec;
-		size = width_of_numb;
-		min = 0;
-		//texture_of_number.y = 35;
-		sec = this->count_of_sec;
-		loadNumb();
-
-	}
-	bool loadNumb()
-	{
-		bool success = true;
-		if (!numbers.loadNumber("img\\Gameplay\\number.png"))
-		{
-			success = false;
-		}
-		return success;
-	}
-	void Converter() {
-		while (sec > 60)
-		{
-			min++;
-			sec -= 60;
-		}
-	}
-	/*Number_sprite Switch(int num) {
-
-		switch (num) {
-		case 1:
-		}
-	}*/
-	void PrintAll(/*Surf game*/) {
-		x = sec % 10;
-		//numbers.setPosition(SCREEN_WIDTH / 2 - size / 2 - size, 61);
-		numbers.show_with_shift_x(SCREEN_WIDTH / 2 + size / 2 + size, x);
-
-		//numbers.show_with_shift_x()
-		//texture_of_number.x = SCREEN_WIDTH - size * 2;
-		////showPic(game, texture_of_number, NUMBERS, x);
-		//game.showPic(game.GetNumber(x), texture_of_number);
-
-		y = (sec / 10);
-		numbers.show_with_shift_x(SCREEN_WIDTH / 2 + size / 2, y);
-		//texture_of_number.x -= size;
-		////showPic(game, texture_of_number, NUMBERS, y);
-		//game.showPic(game.GetNumber(y), texture_of_number);
-
-		numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2, Number_sprite::TWO_DOT);
-		//texture_of_number.x -= size;
-		////showPic(game, texture_of_number, NUMBERS, 10);
-		//game.showPic(game.GetNumber(10), texture_of_number);
-
-		z = min % 10;
-		numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2 - size, z);
-		//texture_of_number.x -= size;
-		////showPic(game, texture_of_number, NUMBERS, z);
-		//game.showPic(game.GetNumber(z), texture_of_number);
-
-		w = (min / 10);
-		numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2 - size * 2, w);
-		//texture_of_number.x -= size;
-		////showPic(game, texture_of_number, NUMBERS, w);
-		//game.showPic(game.GetNumber(w), texture_of_number);
-
-	}
-	void timeGo() {
-		loadNumb();
-		Converter();
-		PrintAll();
-		while (!stop_timer)
-		{
-
-			if (sec == 60) {
-				min++;
-				sec = 0;
-				x = 0; y = 0;
-				z = min % 10;
-				//numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2 - size , z);
-				//if (min - 1 >= 0) {
-				//	min--;
-				//	sec = 60;
-				//	z = min % 10;
-				//	//texture_of_number.x = SCREEN_WIDTH/2 - size/2 - size;
-				//	//showPic(game, texture_of_number, NUMBERS, z);
-				//	//game.showPic(game.GetNumber(z), texture_of_number);
-				//	if ((min / 10) - 1 >= 0) {
-				//		w = (min / 10);
-				//		//texture_of_number.x = SCREEN_WIDTH - size * 6;
-				//		//showPic(game, texture_of_number, NUMBERS, w);
-				//		//game.showPic(game.GetNumber(w), texture_of_number);
-				//	}
-				//}
-				if ((min / 10) - 1 >= 0) {
-					w = (min / 10);
-					//numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2 - size * 2, w);
-					//texture_of_number.x = SCREEN_WIDTH/2 - size/2 - size * 2;
-					//showPic(game, texture_of_number, NUMBERS, w);
-					//game.showPic(game.GetNumber(w), texture_of_number);
-				}
-				/*if ((sec / 10) - 1 == 0) {
-
-				}*/
-			}
-			cout << w << z << ":" << y << x << endl;
-			sec++;
-			//if (x == 0) {
-			//	y = (sec / 10) % 10;
-			//	//texture_of_number.x = SCREEN_WIDTH - size * 3;
-			//	//showPic(game, texture_of_number, NUMBERS, y);
-			//	//game.showPic(game.GetNumber(y), texture_of_number);
-			//}
-			if (x + 1 == 10) {
-				y++;
-				//numbers.show_with_shift_x(SCREEN_WIDTH / 2 + size / 2, y);
-			}
-			x = sec % 10;
-			//numbers.show_with_shift_x(SCREEN_WIDTH / 2 + size / 2 + size, x);
-			//texture_of_number.x = SCREEN_WIDTH - size * 2;
-			//showPic(game, texture_of_number, NUMBERS, x);
-			//game.showPic(game.GetNumber(x), texture_of_number);
-			count_of_sec++;
-			/*if (min == 0 && sec == 0) {
-				stop_timer = true;
-				return;
-			}*/
-			PrintAll();
-			this_thread::sleep_for(chrono::milliseconds(1000));
-
-
-		}
-	}
-
-
-	int GetCountSec() {
-		return count_of_sec;
-	}
-	void SetCountSec(unsigned int digit) {
-
-		count_of_sec = digit;
-	}
-
-};
+//class Cutting
+//{
+//private:
+//	//Top left position
+//	SDL_Point Position;
+//	LTexture pic;
+//	//Currently used sprite
+//	int CurrentSprite;
+//	SDL_Rect sprite_clips[Number_sprite::COUNT_OF_DIG];
+//	int height;
+//	int width;
+//public:
+//	Cutting() :Cutting(WIDTH_OF_PIC, HEIGHT_OF_PIC, 0, 61)
+//	{
+//	}
+//	Cutting(int width, int height, int x, int y)
+//	{
+//		setHeight(height);
+//		setWidth(width);
+//		setPosition(x, y);
+//
+//		CurrentSprite = ZERO;
+//	}
+//	void setHeight(int height)
+//	{
+//		this->height = height;
+//	}
+//	void setWidth(int width)
+//	{
+//		this->width = width;
+//	}
+//	void SetCurrentSprite(int CurrentSprite)
+//	{
+//		this->CurrentSprite = CurrentSprite;
+//	}
+//	/// <summary>
+//	/// Sets top left position
+//	/// </summary>
+//	/// <param name="x">X coordinate</param>
+//	/// <param name="y">Y coordinate</param>
+//
+//	void SetMCurrentSprite(Number_sprite sprite)
+//	{
+//		CurrentSprite = sprite;
+//	}
+//	void setPosition(int x, int y)
+//	{
+//		Position.x = x;
+//		Position.y = y;
+//	}
+//	bool loadNumber(string link)
+//	{
+//		//Loading success flag
+//		bool success = true;
+//
+//		//Load sprites
+//		if (!pic.loadFromFile(link))
+//		{
+//			printf("Failed to load button sprite texture!\n");
+//			success = false;
+//		}
+//		else
+//		{
+//			//Set sprites
+//			for (int i = 0; i < Number_sprite::COUNT_OF_DIG; ++i)
+//			{
+//				sprite_clips[i].x = i * WIDTH_OF_PIC;
+//				sprite_clips[i].y = 0;
+//				sprite_clips[i].w = WIDTH_OF_PIC;
+//				sprite_clips[i].h = HEIGHT_OF_PIC;
+//			}
+//		}
+//
+//		return success;
+//	}
+//	void show_with_shift_x(int x, int current_num)
+//	{
+//		CurrentSprite = current_num;
+//		pic.render(x, Position.y, &sprite_clips[CurrentSprite]);
+//		//SDL_RenderPresent(gRenderer);
+//	}
+//};
+//class Timer {
+//	int size;
+//	int min;//минуты
+//	int sec;
+//	int count_of_sec = 0;
+//	int x = 0, y = 0, z = 0, w = 0; //изменение определенных цифр во времени
+//	//Picture numbers[Number::COUNT_OF_DIG];
+//	Cutting numbers;
+//	//SDL_Rect texture_of_number;
+//public:
+//	Timer() : Timer(0, 30) {
+//
+//	}
+//	Timer(int count_of_sec, int width_of_numb) {
+//		this->count_of_sec = count_of_sec;
+//		size = width_of_numb;
+//		min = 0;
+//		//texture_of_number.y = 35;
+//		sec = this->count_of_sec;
+//		loadNumb();
+//
+//	}
+//	bool loadNumb()
+//	{
+//		bool success = true;
+//		if (!numbers.loadNumber("img\\Gameplay\\number.png"))
+//		{
+//			success = false;
+//		}
+//		return success;
+//	}
+//	void Converter() {
+//		while (sec > 60)
+//		{
+//			min++;
+//			sec -= 60;
+//		}
+//	}
+//	/*Number_sprite Switch(int num) {
+//
+//		switch (num) {
+//		case 1:
+//		}
+//	}*/
+//	void PrintAll(/*Surf game*/) {
+//		x = sec % 10;
+//		//numbers.setPosition(SCREEN_WIDTH / 2 - size / 2 - size, 61);
+//		numbers.show_with_shift_x(SCREEN_WIDTH / 2 + size / 2 + size, x);
+//
+//		//numbers.show_with_shift_x()
+//		//texture_of_number.x = SCREEN_WIDTH - size * 2;
+//		////showPic(game, texture_of_number, NUMBERS, x);
+//		//game.showPic(game.GetNumber(x), texture_of_number);
+//
+//		y = (sec / 10);
+//		numbers.show_with_shift_x(SCREEN_WIDTH / 2 + size / 2, y);
+//		//texture_of_number.x -= size;
+//		////showPic(game, texture_of_number, NUMBERS, y);
+//		//game.showPic(game.GetNumber(y), texture_of_number);
+//
+//		numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2, Number_sprite::TWO_DOT);
+//		//texture_of_number.x -= size;
+//		////showPic(game, texture_of_number, NUMBERS, 10);
+//		//game.showPic(game.GetNumber(10), texture_of_number);
+//
+//		z = min % 10;
+//		numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2 - size, z);
+//		//texture_of_number.x -= size;
+//		////showPic(game, texture_of_number, NUMBERS, z);
+//		//game.showPic(game.GetNumber(z), texture_of_number);
+//
+//		w = (min / 10);
+//		numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2 - size * 2, w);
+//		//texture_of_number.x -= size;
+//		////showPic(game, texture_of_number, NUMBERS, w);
+//		//game.showPic(game.GetNumber(w), texture_of_number);
+//
+//	}
+//	void timeGo() {
+//		loadNumb();
+//		Converter();
+//		PrintAll();
+//		while (!stop_timer)
+//		{
+//
+//			if (sec == 60) {
+//				min++;
+//				sec = 0;
+//				x = 0; y = 0;
+//				z = min % 10;
+//				//numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2 - size , z);
+//				//if (min - 1 >= 0) {
+//				//	min--;
+//				//	sec = 60;
+//				//	z = min % 10;
+//				//	//texture_of_number.x = SCREEN_WIDTH/2 - size/2 - size;
+//				//	//showPic(game, texture_of_number, NUMBERS, z);
+//				//	//game.showPic(game.GetNumber(z), texture_of_number);
+//				//	if ((min / 10) - 1 >= 0) {
+//				//		w = (min / 10);
+//				//		//texture_of_number.x = SCREEN_WIDTH - size * 6;
+//				//		//showPic(game, texture_of_number, NUMBERS, w);
+//				//		//game.showPic(game.GetNumber(w), texture_of_number);
+//				//	}
+//				//}
+//				if ((min / 10) - 1 >= 0) {
+//					w = (min / 10);
+//					//numbers.show_with_shift_x(SCREEN_WIDTH / 2 - size / 2 - size * 2, w);
+//					//texture_of_number.x = SCREEN_WIDTH/2 - size/2 - size * 2;
+//					//showPic(game, texture_of_number, NUMBERS, w);
+//					//game.showPic(game.GetNumber(w), texture_of_number);
+//				}
+//				/*if ((sec / 10) - 1 == 0) {
+//
+//				}*/
+//			}
+//			cout << w << z << ":" << y << x << endl;
+//			sec++;
+//			//if (x == 0) {
+//			//	y = (sec / 10) % 10;
+//			//	//texture_of_number.x = SCREEN_WIDTH - size * 3;
+//			//	//showPic(game, texture_of_number, NUMBERS, y);
+//			//	//game.showPic(game.GetNumber(y), texture_of_number);
+//			//}
+//			if (x + 1 == 10) {
+//				y++;
+//				//numbers.show_with_shift_x(SCREEN_WIDTH / 2 + size / 2, y);
+//			}
+//			x = sec % 10;
+//			//numbers.show_with_shift_x(SCREEN_WIDTH / 2 + size / 2 + size, x);
+//			//texture_of_number.x = SCREEN_WIDTH - size * 2;
+//			//showPic(game, texture_of_number, NUMBERS, x);
+//			//game.showPic(game.GetNumber(x), texture_of_number);
+//			count_of_sec++;
+//			/*if (min == 0 && sec == 0) {
+//				stop_timer = true;
+//				return;
+//			}*/
+//			PrintAll();
+//			this_thread::sleep_for(chrono::milliseconds(1000));
+//
+//
+//		}
+//	}
+//
+//
+//	int GetCountSec() {
+//		return count_of_sec;
+//	}
+//	void SetCountSec(unsigned int digit) {
+//
+//		count_of_sec = digit;
+//	}
+//
+//};
 class File
 {
 	string path ;
 	
 public:
 
-	File():File("level.txt", "1")
+	File():File("level.txt")
 	{
 
+	}
+	File(string path)
+	{
+		this->path = path;
 	}
 	File(string path, string to_write)
 	{
@@ -700,6 +693,7 @@ public:
 		}
 		else
 			cout << "couldn't open file\n";
+		myfile.close();
 	}
 	void rewrite_in_file_num(int num)
 	{
@@ -722,6 +716,7 @@ public:
 		}
 		else
 			cout << "couldn't open file\n";
+		myfile.close();
 	return in_file;
 	}
 	int num_from_file()
@@ -843,11 +838,12 @@ public:
 					SDL_Delay(200);
 					//SDL_RenderClear(gRenderer);
 
-					//texture_bg.free();
-					//for (int i = 0; i < count_of_but; i++)
-					//{
-					//	button[i].free();
-					//}
+					texture_bg.free();
+					for (int i = 0; i < count_of_but; i++)
+					{
+						button[i].free();
+					}
+
 					button[i].SetMCurrentSprite(LButtonSprite::BUTTON_SPRITE_MOUSE_OUT);
 					return SelectedButtonInCurrentWindow(i);
 				}
@@ -1445,6 +1441,11 @@ public:
 		CurrentSprite = NOT_SELECTED;
 	}
 
+	LTexture* getPuzzleSpriteSheetTexture()
+	{
+		return &PuzzleSpriteSheetTexture;
+	}
+
 	int getPuzzlepieceWidth()
 	{
 		return PUZZLEPIECE_WIDTH;
@@ -1546,8 +1547,9 @@ public:
 	}
 
 	//Handles mouse event
-	int handleEvent(SDL_Event* e, PuzzlePiece** selected_puzzlepiece, Slot** selected_slot)
+	bool handleEvent(SDL_Event* e, PuzzlePiece** selected_puzzlepiece, Slot** selected_slot)
 	{
+		bool event_caught = false;
 		//If mouse event happened
 		if (e->type == SDL_MOUSEMOTION || e->type == SDL_MOUSEBUTTONDOWN || e->type == SDL_MOUSEBUTTONUP)
 		{
@@ -1627,21 +1629,23 @@ public:
 							cout << "Puzzlepiece dropped from slot\n";
 						}
 					}
+					event_caught = true;
 				}
 			}
 		}
-		return selected;
+		return event_caught;
 	}
 
-	void UpdatePosition(Slot** selected_slot)
+	bool UpdatePosition(Slot** selected_slot)
 	{
+		bool event_caught = false;
 		if (*selected_slot != nullptr)
 		{
 			(*selected_slot)->setSelected(false);
-			cout << "Slot unselected\n";
+			//cout << "Slot unselected\n";
 			if (!in_slot)
 			{
-				cout << "Puzzlepiece not in slot\n";
+				//cout << "Puzzlepiece not in slot\n";
 				// If slot is empty
 				if ((*selected_slot)->getContainedPuzzlepiece() == nullptr)
 				{
@@ -1652,9 +1656,11 @@ public:
 					CurrentSprite = NOT_SELECTED;
 					(*selected_slot)->setContainedPuzzlepiece(this);
 					//*selected_slot = nullptr;
+					event_caught = true;
 				}
 			}
 		}
+		return event_caught;
 	}
 
 };
@@ -1668,8 +1674,10 @@ private:
 	int PUZZLEPIECES_HOR;
 	int PUZZLEPIECES_VERT;
 	int MARGIN;
-	PuzzlePiece** Puzzlepieces;
-	Slot** Slots;
+	vector <vector <PuzzlePiece>> Puzzlepieces;
+	vector <vector <Slot>> Slots;
+	//PuzzlePiece** Puzzlepieces;
+	//Slot** Slots;
 	LButton back;
 public:
 	//Initializes internal variables
@@ -1697,20 +1705,41 @@ public:
 		back.setPosition(85, 30);
 		back.setWidth(106);
 		back.setHeight(113);
-		
+		// Initializing puzzlepieces 2d vector 
+		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+		{
+			vector <PuzzlePiece> pzz;
+			Puzzlepieces.push_back(pzz);
+			for (int j = 0; j < PUZZLEPIECES_HOR; j++)
+			{
+				PuzzlePiece p;
+				Puzzlepieces[i].push_back(p);
+			}
+		}
+		// Initializing slots 2d vector
+		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+		{
+			vector <Slot> sl;
+			Slots.push_back(sl);
+			for (int j = 0; j < PUZZLEPIECES_HOR; j++)
+			{
+				Slot s;
+				Slots[i].push_back(s);
+			}
+		}
 	}
-
-	~Puzzle()
+	// Deallocates all textures
+	void Clean()
 	{
+		field_texture.free();
+		back.getButtonSpriteSheetTexture()->free();
 		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
 		{
-			delete[] Puzzlepieces[i];
+			for (int j = 0; j < PUZZLEPIECES_HOR; j++)
+			{
+				Puzzlepieces[i][j].getPuzzleSpriteSheetTexture()->free();
+			}
 		}
-		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
-		{
-			delete[] Slots[i];
-		}
-		
 	}
 
 	void Load_Bg()
@@ -1740,7 +1769,7 @@ public:
 	void render()
 	{
 
-		back.render();
+		//back.render();
 
 		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
 		{
@@ -1785,18 +1814,6 @@ public:
 		default:
 			break;
 		}
-		// Initializing puzzlepieces dynamic 2d array
-		Puzzlepieces = new PuzzlePiece * [PUZZLEPIECES_VERT];
-		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
-		{
-			Puzzlepieces[i] = new PuzzlePiece[PUZZLEPIECES_HOR];
-		}
-		// Initializing slots dynamic 2d array
-		Slots = new Slot * [PUZZLEPIECES_VERT];
-		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
-		{
-			Slots[i] = new Slot[PUZZLEPIECES_HOR];
-		}
 
 		for (int i = 0, number = 0; i < PUZZLEPIECES_VERT; i++)
 		{
@@ -1804,7 +1821,7 @@ public:
 			{
 				// Load puzzlepieces textures and set sprites
 				Puzzlepieces[i][j].setPuzzlepieceDimensions(width, height);
-				;				Puzzlepieces[i][j].loadPuzzlepiece(link);
+				Puzzlepieces[i][j].loadPuzzlepiece(link);
 				Puzzlepieces[i][j].Set_PuzzlepieceClip(j * Puzzlepieces[i][j].getPuzzlepieceWidth(), i * Puzzlepieces[i][j].getPuzzlepieceHeight(), Puzzlepieces[i][j].getPuzzlepieceWidth(), Puzzlepieces[i][j].getPuzzlepieceHeight());
 				Puzzlepieces[i][j].setNumber(number);
 				Puzzlepieces[i][j].setDefaultPosition(start_def_x + j * (Puzzlepieces[i][j].getPuzzlepieceWidth() + MARGIN), start_def_y + i * (Puzzlepieces[i][j].getPuzzlepieceHeight() + MARGIN));
@@ -1868,9 +1885,14 @@ public:
 				Slots[i][j].setContainedPuzzlepiece(nullptr);
 				Slots[i][j].setSelected(false);
 			}
-			*selected_puzzlepiece = nullptr;
-			*selected_slot = nullptr;
 		}
+		*selected_puzzlepiece = nullptr;
+		*selected_slot = nullptr;
+		RenderBG();
+		render();
+		back.render();
+		SDL_Delay(100);
+		SDL_RenderPresent(gRenderer);
 	}
 
 	int Game()
@@ -1879,6 +1901,7 @@ public:
 		Load_Bg();
 		loadButton();
 		RenderBG();
+		back.render();
 		render();
 		SDL_RenderPresent(gRenderer);
 		bool quit = false;
@@ -1886,13 +1909,14 @@ public:
 
 		Slot* selected_slot = nullptr;
 		PuzzlePiece* selected_puzzlepiece = nullptr;
-		Timer timer;
+		//Timer timer;
 		
-		thread th(&Timer::timeGo, ref(timer));//ref - используется 
-		th.detach();
+		//thread th(&Timer::timeGo, ref(timer));//ref - используется 
+		//th.detach();
 		stop_timer = false;
 
 		int event = LButtonSprite::BUTTON_SPRITE_MOUSE_OUT;
+		bool pzz_event = false; // any puzzlepieces events flag (selection, moving, etc)
 		while (!quit)
 		{
 			//Handle events on queue
@@ -1917,7 +1941,10 @@ public:
 					for (int j = 0; j < PUZZLEPIECES_HOR; j++)
 					{
 						Slots[i][j].handleEvent(&e);
-						Puzzlepieces[i][j].handleEvent(&e, &selected_puzzlepiece, &selected_slot);
+						if (Puzzlepieces[i][j].handleEvent(&e, &selected_puzzlepiece, &selected_slot))
+						{
+							pzz_event = true;
+						}
 					}
 				}
 				event = back.handleEvent(&e);
@@ -1930,92 +1957,111 @@ public:
 				SDL_RenderPresent(gRenderer);
 				SDL_Delay(200);
 				if (is_exit(e))
+				{
+					Clean();
 					return Window::GAME_WIND;
+				}
+					
 				stop_timer = false;
 				RenderBG();
+				back.render();
 				render();
 				SDL_RenderPresent(gRenderer);
 			}
 			else if (event == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION
-				//|| event == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT
-				)
+				|| event == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT)
 			{
 				//SDL_RenderClear(gRenderer);
 				//RenderBG();
-				render();
-				//SDL_RenderPresent(gRenderer);
+				back.render();
+				SDL_RenderPresent(gRenderer);
 			}
-				//Finding a selected slot
-				for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+			//Finding a selected slot
+			for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+			{
+				for (int j = 0; j < PUZZLEPIECES_HOR; j++)
 				{
-					for (int j = 0; j < PUZZLEPIECES_HOR; j++)
+					if (Slots[i][j].IsSelected())
 					{
-						if (Slots[i][j].IsSelected())
-						{
-							selected_slot = &Slots[i][j];
-							cout << "Slot " << Slots[i][j].getNumber() << " selected\n";
-							i = PUZZLEPIECES_VERT;
-							break;
-						}
+						selected_slot = &Slots[i][j];
+						//cout << "Slot " << Slots[i][j].getNumber() << " selected\n";
+						i = PUZZLEPIECES_VERT;
+						break;
 					}
 				}
+			}
 
-				//Updating selected puzzlepiece
-				for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+			//Updating selected puzzlepiece
+			for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+			{
+				for (int j = 0; j < PUZZLEPIECES_HOR; j++)
 				{
-					for (int j = 0; j < PUZZLEPIECES_HOR; j++)
+					if (Puzzlepieces[i][j].IsSelected())
 					{
-						if (Puzzlepieces[i][j].IsSelected())
+						selected_puzzlepiece = &Puzzlepieces[i][j];
+						if (Puzzlepieces[i][j].UpdatePosition(&selected_slot))
 						{
-							selected_puzzlepiece = &Puzzlepieces[i][j];
-							Puzzlepieces[i][j].UpdatePosition(&selected_slot);
-							i = PUZZLEPIECES_VERT;
-							break;
+							pzz_event = true;
 						}
+						i = PUZZLEPIECES_VERT;
+						break;
 					}
 				}
-				
-				if (AllSlotsFilled())
+			}
+			
+			if (AllSlotsFilled())
+			{
+				if (IsOrderCorrect())
 				{
-					if (IsOrderCorrect())
+					File current_level_f;
+					int current_lev = current_level_f.num_from_file();
+					if (level - 1 == current_lev)
 					{
-						File current_level_f;
-						int current_lev = current_level_f.num_from_file();
 						current_lev++;
-						current_level_f.rewrite_in_file_num(current_lev);
-						cout << "Kruto\n";
-						switch (level)
-						{
-						case 1:
-							return Window::LEVEL2_WIND;
-							break;
-						case 2:
-							return Window::LEVEL3_WIND;
-							break;
-						case 3:
-							return Window::GAME_WIND;
-							break;
-						default:
-							break;
-						}
-						quit = true;
-					}
-					else
-					{
-						cout << "Ne kruto\n";
-						Reset(&selected_puzzlepiece, &selected_slot);
 					}
 
+					current_level_f.rewrite_in_file_num(current_lev);
+					cout << "Kruto\n";
+					switch (level)
+					{
+					case 1:
+						Clean();
+						
+						return Window::LEVEL2_WIND;
+						break;
+					case 2:
+						Clean();
+						return Window::LEVEL3_WIND;
+						break;
+					case 3:
+						Clean();
+						return Window::GAME_WIND;
+						break;
+					default:
+						break;
+					}
+					quit = true;
+				}
+				else
+				{
+					cout << "Ne kruto\n";
+					Reset(&selected_puzzlepiece, &selected_slot);
 				}
 
+			}
+			if (pzz_event)
+			{
 				//SDL_RenderClear(gRenderer);
 				RenderBG();
 				render();
-				//back.render();
+				back.render();
 				SDL_Delay(100);
+				SDL_RenderPresent(gRenderer);
 			}
-			//Update screen
-			SDL_RenderPresent(gRenderer);
+			pzz_event = false;
+		}
+		//Update screen
+		//SDL_RenderPresent(gRenderer);
 		
 	}
 };
