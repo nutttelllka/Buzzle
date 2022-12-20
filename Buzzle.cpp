@@ -1,6 +1,27 @@
 ﻿#include "classes.h"
 //using namespace std;
-
+int level_game(int window_click)
+{
+	if (window_click == LEVEL1_WIND)
+	{
+		Puzzle pzz1(1);
+		//wind_to_return = LEVEL1_WIND;
+		window_click = pzz1.Game();
+	}
+	else if (window_click == Window::LEVEL2_WIND)
+	{
+		Puzzle pzz2(2);
+		//wind_to_return = LEVEL2_WIND;
+		window_click = pzz2.Game();
+	}
+	else if (window_click == Window::LEVEL3_WIND)
+	{
+		Puzzle pzz3(3);
+		//wind_to_return = LEVEL3_WIND;
+		window_click = pzz3.Game();
+	}
+	return window_click;
+}
 int main(int argc, char* args[])
 {
 	//Start up SDL and create window
@@ -58,24 +79,28 @@ int main(int argc, char* args[])
 					LevelSelection l(535, 429, 124, 107, 430);
 					window_click = l.click_window();
 				}
-				else if (window_click == LEVEL1_WIND)
+				else if (window_click == LEVEL1_WIND || window_click == Window::LEVEL2_WIND || window_click == Window::LEVEL3_WIND)
 				{
-					Puzzle pzz1(1);
-					//wind_to_return = LEVEL1_WIND;
-					window_click = pzz1.Game();
+					window_click = level_game(window_click);
 				}
-				else if (window_click == Window::LEVEL2_WIND)
-				{
-					Puzzle pzz2(2);
-					//wind_to_return = LEVEL2_WIND;
-					window_click = pzz2.Game();
-				}
-				else if (window_click == Window::LEVEL3_WIND)
-				{
-					Puzzle pzz3(3);
-					//wind_to_return = LEVEL3_WIND;
-					window_click = pzz3.Game();
-				}
+				//else if (window_click == LEVEL1_WIND)
+				//{
+				//	Puzzle pzz1(1);
+				//	//wind_to_return = LEVEL1_WIND;
+				//	window_click = pzz1.Game();
+				//}
+				//else if (window_click == Window::LEVEL2_WIND)
+				//{
+				//	Puzzle pzz2(2);
+				//	//wind_to_return = LEVEL2_WIND;
+				//	window_click = pzz2.Game();
+				//}
+				//else if (window_click == Window::LEVEL3_WIND)
+				//{
+				//	Puzzle pzz3(3);
+				//	//wind_to_return = LEVEL3_WIND;
+				//	window_click = pzz3.Game();
+				//}
 				else if (window_click == Window::EXIT_WIND)
 				{
 					Exit e;
