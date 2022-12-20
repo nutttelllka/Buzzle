@@ -1647,6 +1647,7 @@ private:
 	//PuzzlePiece** Puzzlepieces;
 	//Slot** Slots;
 	LButton back;
+	LButton reset;
 public:
 	//Initializes internal variables
 	Puzzle(int level)
@@ -1673,6 +1674,8 @@ public:
 		back.setPosition(85, 30);
 		back.setWidth(106);
 		back.setHeight(113);
+		reset.setHeight(113);
+		reset.setWidth(106);
 		// Initializing puzzlepieces 2d vector 
 		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
 		{
@@ -1902,7 +1905,6 @@ public:
 						return CLOSE_GAME;
 					}
 						
-
 					stop_timer = false;
 					thread th(&Timer::timeGo, ref(timer));//ref - используется 
 					th.detach();
@@ -1910,7 +1912,6 @@ public:
 					render();
 					back.render();
 					timer.PrintAll();
-					
 					
 				}
 				
