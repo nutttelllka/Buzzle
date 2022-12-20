@@ -254,15 +254,16 @@ public:
 		setPosition(x, y);
 		mCurrentSprite = BUTTON_SPRITE_MOUSE_OUT;
 	}
+
+	LTexture* getButtonSpriteSheetTexture()
+	{
+		return &gButtonSpriteSheetTexture;
+	}
+
 	void SetBlock(bool is_clicked)
 	{
 		this->is_clicked = is_clicked;
 	}
-	/// <summary>
-	/// Sets top left position
-	/// </summary>
-	/// <param name="x">X coordinate</param>
-	/// <param name="y">Y coordinate</param>
 
 	void SetMCurrentSprite(LButtonSprite sprite)
 	{
@@ -284,11 +285,7 @@ public:
 	{
 		this->width = width;
 	}
-	/// <summary>
-	/// Handles mouse event
-	/// </summary>
-	/// <param name="e">mouse event</param>
-	/// <returns>returns button sprite number</returns>
+
 	int handleEvent(SDL_Event* e)
 	{
 		int button_sprite = BUTTON_SPRITE_MOUSE_OUT;
@@ -1445,6 +1442,11 @@ public:
 		CurrentSprite = NOT_SELECTED;
 	}
 
+	LTexture* getPuzzleSpriteSheetTexture()
+	{
+		return &PuzzleSpriteSheetTexture;
+	}
+
 	int getPuzzlepieceWidth()
 	{
 		return PUZZLEPIECE_WIDTH;
@@ -1546,8 +1548,9 @@ public:
 	}
 
 	//Handles mouse event
-	int handleEvent(SDL_Event* e, PuzzlePiece** selected_puzzlepiece, Slot** selected_slot)
+	bool handleEvent(SDL_Event* e, PuzzlePiece** selected_puzzlepiece, Slot** selected_slot)
 	{
+		bool event_caught = false;
 		//If mouse event happened
 		if (e->type == SDL_MOUSEMOTION || e->type == SDL_MOUSEBUTTONDOWN || e->type == SDL_MOUSEBUTTONUP)
 		{
@@ -1627,21 +1630,23 @@ public:
 							cout << "Puzzlepiece dropped from slot\n";
 						}
 					}
+					event_caught = true;
 				}
 			}
 		}
-		return selected;
+		return event_caught;
 	}
 
-	void UpdatePosition(Slot** selected_slot)
+	bool UpdatePosition(Slot** selected_slot)
 	{
+		bool event_caught = false;
 		if (*selected_slot != nullptr)
 		{
 			(*selected_slot)->setSelected(false);
-			cout << "Slot unselected\n";
+			//cout << "Slot unselected\n";
 			if (!in_slot)
 			{
-				cout << "Puzzlepiece not in slot\n";
+				//cout << "Puzzlepiece not in slot\n";
 				// If slot is empty
 				if ((*selected_slot)->getContainedPuzzlepiece() == nullptr)
 				{
@@ -1652,9 +1657,11 @@ public:
 					CurrentSprite = NOT_SELECTED;
 					(*selected_slot)->setContainedPuzzlepiece(this);
 					//*selected_slot = nullptr;
+					event_caught = true;
 				}
 			}
 		}
+		return event_caught;
 	}
 
 };
@@ -1722,6 +1729,19 @@ public:
 			}
 		}
 	}
+	// Deallocates all textures
+	void Clean()
+	{
+		field_texture.free();
+		back.getButtonSpriteSheetTexture()->free();
+		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+		{
+			for (int j = 0; j < PUZZLEPIECES_HOR; j++)
+			{
+				Puzzlepieces[i][j].getPuzzleSpriteSheetTexture()->free();
+			}
+		}
+	}
 
 	void Load_Bg()
 	{
@@ -1750,7 +1770,7 @@ public:
 	void render()
 	{
 
-		back.render();
+		//back.render();
 
 		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
 		{
@@ -1866,9 +1886,14 @@ public:
 				Slots[i][j].setContainedPuzzlepiece(nullptr);
 				Slots[i][j].setSelected(false);
 			}
-			*selected_puzzlepiece = nullptr;
-			*selected_slot = nullptr;
 		}
+		*selected_puzzlepiece = nullptr;
+		*selected_slot = nullptr;
+		RenderBG();
+		render();
+		back.render();
+		SDL_Delay(100);
+		SDL_RenderPresent(gRenderer);
 	}
 
 	int Game()
@@ -1877,6 +1902,7 @@ public:
 		Load_Bg();
 		loadButton();
 		RenderBG();
+		back.render();
 		render();
 		SDL_RenderPresent(gRenderer);
 		bool quit = false;
@@ -1891,6 +1917,7 @@ public:
 		stop_timer = false;
 
 		int event = LButtonSprite::BUTTON_SPRITE_MOUSE_OUT;
+		bool pzz_event = false; // any puzzlepieces events flag (selection, moving, etc)
 		while (!quit)
 		{
 			//Handle events on queue
@@ -1915,7 +1942,10 @@ public:
 					for (int j = 0; j < PUZZLEPIECES_HOR; j++)
 					{
 						Slots[i][j].handleEvent(&e);
-						Puzzlepieces[i][j].handleEvent(&e, &selected_puzzlepiece, &selected_slot);
+						if (Puzzlepieces[i][j].handleEvent(&e, &selected_puzzlepiece, &selected_slot))
+						{
+							pzz_event = true;
+						}
 					}
 				}
 				event = back.handleEvent(&e);
@@ -1928,19 +1958,24 @@ public:
 				SDL_RenderPresent(gRenderer);
 				SDL_Delay(200);
 				if (is_exit(e))
+				{
+					Clean();
 					return Window::GAME_WIND;
+				}
+					
 				stop_timer = false;
 				RenderBG();
+				back.render();
 				render();
 				SDL_RenderPresent(gRenderer);
 			}
-			else if (event == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION)
-				//|| event == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT)
+			else if (event == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION
+				|| event == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT)
 			{
 				//SDL_RenderClear(gRenderer);
 				//RenderBG();
-				render();
-				//SDL_RenderPresent(gRenderer);
+				back.render();
+				SDL_RenderPresent(gRenderer);
 			}
 			//Finding a selected slot
 			for (int i = 0; i < PUZZLEPIECES_VERT; i++)
@@ -1950,7 +1985,7 @@ public:
 					if (Slots[i][j].IsSelected())
 					{
 						selected_slot = &Slots[i][j];
-						cout << "Slot " << Slots[i][j].getNumber() << " selected\n";
+						//cout << "Slot " << Slots[i][j].getNumber() << " selected\n";
 						i = PUZZLEPIECES_VERT;
 						break;
 					}
@@ -1965,7 +2000,10 @@ public:
 					if (Puzzlepieces[i][j].IsSelected())
 					{
 						selected_puzzlepiece = &Puzzlepieces[i][j];
-						Puzzlepieces[i][j].UpdatePosition(&selected_slot);
+						if (Puzzlepieces[i][j].UpdatePosition(&selected_slot))
+						{
+							pzz_event = true;
+						}
 						i = PUZZLEPIECES_VERT;
 						break;
 					}
@@ -1984,12 +2022,15 @@ public:
 					switch (level)
 					{
 					case 1:
+						Clean();
 						return Window::LEVEL2_WIND;
 						break;
 					case 2:
+						Clean();
 						return Window::LEVEL3_WIND;
 						break;
 					case 3:
+						Clean();
 						return Window::GAME_WIND;
 						break;
 					default:
@@ -2004,15 +2045,19 @@ public:
 				}
 
 			}
-
-			//SDL_RenderClear(gRenderer);
-			RenderBG();
-			render();
-			//back.render();
-			SDL_Delay(100);
+			if (pzz_event)
+			{
+				//SDL_RenderClear(gRenderer);
+				RenderBG();
+				render();
+				back.render();
+				SDL_Delay(100);
+				SDL_RenderPresent(gRenderer);
+			}
+			pzz_event = false;
 		}
 		//Update screen
-		SDL_RenderPresent(gRenderer);
+		//SDL_RenderPresent(gRenderer);
 		
 	}
 };
