@@ -10,7 +10,8 @@
 #include <chrono>
 #include <fstream>
 #include <sstream>    // header file for stringstream
-
+#include <random>  //for rand()
+#include <algorithm> // for shuffle()
 
 
 using namespace std;

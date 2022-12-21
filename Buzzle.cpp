@@ -26,6 +26,7 @@ int level_game(int window_click)
 }
 int main(int argc, char* args[])
 {
+	srand(time(0));
 	//Start up SDL and create window
 	if (!init())
 	{
