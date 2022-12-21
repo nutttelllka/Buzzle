@@ -1853,6 +1853,34 @@ public:
 		default:
 			break;
 		}
+		// Puzzlepieces default coords array
+		SDL_Point** Default_coords = new SDL_Point* [PUZZLEPIECES_VERT];
+		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+		{
+			Default_coords[i] = new SDL_Point[PUZZLEPIECES_HOR];
+		}
+		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+		{
+			for (int j = 0; j < PUZZLEPIECES_HOR; j++)
+			{
+				Default_coords[i][j].x = start_def_x + j * (width + MARGIN);
+				Default_coords[i][j].y = start_def_y + i * (height + MARGIN);
+			}
+		}
+		// Randomizing default coords
+		random_shuffle(Default_coords, Default_coords + PUZZLEPIECES_HOR);
+		for (int i = 0; i < PUZZLEPIECES_HOR; i++)
+		{
+			random_shuffle(Default_coords[i], Default_coords[i] + PUZZLEPIECES_HOR);
+		}
+		for (int i = 0; i < 10; i++)
+		{
+			int rnd1 = rand() % (PUZZLEPIECES_HOR);
+			int rnd2 = rand() % (PUZZLEPIECES_HOR);
+			int rnd3 = rand() % (PUZZLEPIECES_HOR);
+			int rnd4 = rand() % (PUZZLEPIECES_HOR);
+			swap(Default_coords[rnd1][rnd2], Default_coords[rnd3][rnd4]);
+		}
 
 		for (int i = 0, number = 0; i < PUZZLEPIECES_VERT; i++)
 		{
@@ -1863,13 +1891,18 @@ public:
 				Puzzlepieces[i][j].loadPuzzlepiece(link);
 				Puzzlepieces[i][j].Set_PuzzlepieceClip(j * Puzzlepieces[i][j].getPuzzlepieceWidth(), i * Puzzlepieces[i][j].getPuzzlepieceHeight(), Puzzlepieces[i][j].getPuzzlepieceWidth(), Puzzlepieces[i][j].getPuzzlepieceHeight());
 				Puzzlepieces[i][j].setNumber(number);
-				Puzzlepieces[i][j].setDefaultPosition(start_def_x + j * (Puzzlepieces[i][j].getPuzzlepieceWidth() + MARGIN), start_def_y + i * (Puzzlepieces[i][j].getPuzzlepieceHeight() + MARGIN));
+				Puzzlepieces[i][j].setDefaultPosition(Default_coords[i][j].x, Default_coords[i][j].y);
 				Puzzlepieces[i][j].setPosition();
 				// Set slots configurations
 				Slots[i][j].setSlotDimensions(width, height);
 				Slots[i][j].setPosition(825 + j * Slots[i][j].getSlotWidth(), 286 + i * Slots[i][j].getSlotHeight());
 				Slots[i][j].setNumber(number);
 			}
+		}
+
+		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
+		{
+			delete[] Default_coords[i];
 		}
 		return true;
 	}
