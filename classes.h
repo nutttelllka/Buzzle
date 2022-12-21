@@ -850,7 +850,7 @@ private:
 	int selected_window;
 	static int count_of_wind;
 public:
-	Exit() :CurrentWindow(306, 670, 460, 107, 430, ExitButtons::COUNT_OF_BUT,Window::EXIT_WIND, false)
+	Exit() :CurrentWindow(306, 670, 460, 108, 430, ExitButtons::COUNT_OF_BUT,Window::EXIT_WIND, false)
 	{
 		count_of_wind++;
 	}
@@ -1678,8 +1678,8 @@ public:
 		MARGIN = 10;
 		back.setPosition(85, 30);
 		back.setWidth(106);
-		back.setHeight(113);
-		reset.setHeight(113);
+		back.setHeight(114);
+		reset.setHeight(114);
 		reset.setWidth(106);
 		reset.setPosition(1309,30);
 		// Initializing puzzlepieces 2d vector 
