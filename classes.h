@@ -617,7 +617,12 @@ public:
 		
 		//Спроси как делать очистку от картинок
 	}
-
+	void Reset()
+	{
+		sec = this->count_of_sec;
+		min = 0;
+		Converter();
+	}
 	//Getters
 	int GetCountSec()
 	{
@@ -845,7 +850,7 @@ private:
 	int selected_window;
 	static int count_of_wind;
 public:
-	Exit() :CurrentWindow(306, 670, 460, 107, 430, ExitButtons::COUNT_OF_BUT,Window::EXIT_WIND, false)
+	Exit() :CurrentWindow(306, 670, 460, 108, 430, ExitButtons::COUNT_OF_BUT,Window::EXIT_WIND, false)
 	{
 		count_of_wind++;
 	}
@@ -1647,6 +1652,7 @@ private:
 	//PuzzlePiece** Puzzlepieces;
 	//Slot** Slots;
 	LButton back;
+	LButton reset;
 public:
 	//Initializes internal variables
 	Puzzle(int level)
@@ -1672,7 +1678,10 @@ public:
 		MARGIN = 10;
 		back.setPosition(85, 30);
 		back.setWidth(106);
-		back.setHeight(113);
+		back.setHeight(114);
+		reset.setHeight(114);
+		reset.setWidth(106);
+		reset.setPosition(1309,30);
 		// Initializing puzzlepieces 2d vector 
 		for (int i = 0; i < PUZZLEPIECES_VERT; i++)
 		{
@@ -1809,6 +1818,10 @@ public:
 		{
 			success = false;
 		}
+		if (!reset.loadButton("img\\Gameplay\\Reset.png"))
+		{
+			success = false;
+		}
 		return success;
 	}
 	bool AllSlotsFilled()
@@ -1856,11 +1869,7 @@ public:
 		}
 		*selected_puzzlepiece = nullptr;
 		*selected_slot = nullptr;
-		RenderBG();
-		render();
-		back.render();
-		SDL_Delay(100);
-		SDL_RenderPresent(gRenderer);
+
 	}
 
 	int Game()
@@ -1884,7 +1893,7 @@ public:
 		th.detach();
 		
 
-		int event = LButtonSprite::BUTTON_SPRITE_MOUSE_OUT;
+		int event[2] = { LButtonSprite::BUTTON_SPRITE_MOUSE_OUT,LButtonSprite::BUTTON_SPRITE_MOUSE_OUT };
 		bool pzz_event = false; // any puzzlepieces events flag (selection, moving, etc)
 		while (!quit)
 		{
@@ -1902,7 +1911,6 @@ public:
 						return CLOSE_GAME;
 					}
 						
-
 					stop_timer = false;
 					thread th(&Timer::timeGo, ref(timer));//ref - используется 
 					th.detach();
@@ -1910,7 +1918,6 @@ public:
 					render();
 					back.render();
 					timer.PrintAll();
-					
 					
 				}
 				
@@ -1926,14 +1933,16 @@ public:
 						}
 					}
 				}
-				event = back.handleEvent(&e);
+				event[ButtonsInGame::BACK_TO_CH_LEV] = back.handleEvent(&e);
+				event[ButtonsInGame::RESET] = reset.handleEvent(&e);
 			}
-			if (event == LButtonSprite::BUTTON_SPRITE_MOUSE_DOWN)
+			if (event[ButtonsInGame::BACK_TO_CH_LEV] == LButtonSprite::BUTTON_SPRITE_MOUSE_DOWN)
 			{
 
 				back.render();
 				stop_timer = true;
 				SDL_RenderPresent(gRenderer);
+				back.SetMCurrentSprite(LButtonSprite::BUTTON_SPRITE_MOUSE_OUT);
 				SDL_Delay(200);
 				if (is_exit(e))
 				{
@@ -1950,12 +1959,40 @@ public:
 				timer.PrintAll();
 				SDL_RenderPresent(gRenderer);
 			}
-			else if (event == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION
-				|| event == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT)
+			else if (event[ButtonsInGame::BACK_TO_CH_LEV] == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION
+				|| event[ButtonsInGame::BACK_TO_CH_LEV]== LButtonSprite::BUTTON_SPRITE_MOUSE_OUT)
 			{
 				//SDL_RenderClear(gRenderer);
 				//RenderBG();
 				back.render();
+				SDL_RenderPresent(gRenderer);
+			}
+
+			if (event[ButtonsInGame::RESET] == LButtonSprite::BUTTON_SPRITE_MOUSE_DOWN)
+			{
+				reset.render();
+				SDL_RenderPresent(gRenderer);
+				SDL_Delay(200);
+				//reset.SetMCurrentSprite(LButtonSprite::BUTTON_SPRITE_MOUSE_OUT);
+				reset.SetMCurrentSprite(LButtonSprite::BUTTON_SPRITE_MOUSE_OUT);
+				
+				Reset(&selected_puzzlepiece, &selected_slot);
+				//timer.Reset();
+				RenderBG();
+				render();
+				back.render();
+				reset.render();
+				SDL_Delay(100);
+				timer.PrintAll();
+				SDL_RenderPresent(gRenderer);
+			}
+			else if (event[ButtonsInGame::RESET] == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION
+				|| event[ButtonsInGame::RESET] == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT)
+			{
+				//SDL_RenderClear(gRenderer);
+				//RenderBG();
+				reset.render();
+				//timer.PrintAll();
 				SDL_RenderPresent(gRenderer);
 			}
 			//Finding a selected slot
@@ -2041,6 +2078,7 @@ public:
 				RenderBG();
 				render();
 				back.render();
+				reset.render();
 				timer.PrintAll();
 				SDL_Delay(100);
 				SDL_RenderPresent(gRenderer);

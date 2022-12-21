@@ -88,3 +88,8 @@ enum Number_sprite
 	WIDTH_OF_PIC = 30,
 	HEIGHT_OF_PIC = 36
 };
+enum ButtonsInGame
+{
+	BACK_TO_CH_LEV,
+	RESET
+};
