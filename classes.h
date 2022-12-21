@@ -574,9 +574,11 @@ public:
 	}
 	void timeGo()
 	{
+		stop_timer = false;
 		//loadNumb();
 		Converter();
 		PrintAll();
+		SDL_Delay(200);
 		while (!stop_timer)
 		{
 			if (sec == 0) {
@@ -766,7 +768,7 @@ public:
 	int click_window()
 	{
 		vector <int> event_buttons;
-
+		stop_timer = true;
 		for (int i = 0; i < count_of_but; i++)
 		{
 			event_buttons.push_back(0);
@@ -811,13 +813,15 @@ public:
 					SDL_Delay(200);
 					//SDL_RenderClear(gRenderer);
 
+					button[i].SetMCurrentSprite(LButtonSprite::BUTTON_SPRITE_MOUSE_OUT);
+
 					texture_bg.free();
 					for (int i = 0; i < count_of_but; i++)
 					{
 						button[i].free();
 					}
 
-					button[i].SetMCurrentSprite(LButtonSprite::BUTTON_SPRITE_MOUSE_OUT);
+					
 					return SelectedButtonInCurrentWindow(i);
 				}
 				else if (event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION 
@@ -1220,21 +1224,78 @@ public:
 	}
 };
 int Gallery::selected_pic = FIRST;
-//bool is_exit(int selected_window, SDL_Event ev)
+bool is_exit(int selected_window, SDL_Event ev)
+{
+	Exit e;
+
+	if (e.GetCountOfWind() > 1)
+	{
+		if (x_is_pressed(ev))
+			return true;
+		return false;
+	}
+	e.SetSelectedWindow(selected_window);
+	if (e.click_window() == CLOSE_GAME)
+		return true;
+	else
+		return false;
+}
+class Lose : public CurrentWindow
+{
+public:
+	Lose() :CurrentWindow(306, 670, 460, 108, 430, ExitButtons::COUNT_OF_BUT, Window::EXIT_WIND, false)
+	{
+
+	}
+	~Lose()
+	{
+	
+	}
+	bool LoadButton()override
+	{
+		bool success = true;
+		if (!button[YES].loadButton("img\\Exit\\yes.png"))
+		{
+			success = false;
+		}
+		if (!button[NO].loadButton("img\\Exit\\no.png"))
+		{
+			success = false;
+		}
+		return success;
+	}
+	bool LoadBg()override
+	{
+		bool success = true;
+		if (!texture_bg.loadFromFile("img\\Gameplay\\Lose.png"))
+		{
+			success = false;
+		}
+		return success;
+	}
+	int SelectedButtonInCurrentWindow(int button)override
+	{
+			switch (button)
+			{
+			case ButtonsInGame::BACK_TO_CH_LEV:
+				return ButtonsInGame::BACK_TO_CH_LEV;
+				break;
+			case ButtonsInGame::RESET:
+				return ButtonsInGame::RESET;
+				break;
+			case EXIT_WIND:
+				return EXIT_WIND;
+			}
+	}
+};
+//bool again(int level)
 //{
-//	Exit e;
-//
-//	if (e.GetCountOfWind() > 1)
-//	{
-//		if (x_is_pressed(ev))
-//			return true;
+//	Lose l;
+//	if (l.click_window() == BACK_TO_CH_LEV)
 //		return false;
-//	}
-//	e.SetSelectedWindow(selected_window);
-//	if (e.click_window() == CLOSE_GAME)
+//	else if (l.click_window() == RESET)
 //		return true;
-//	else
-//		return false;
+//	
 //}
 bool is_exit( SDL_Event ev)
 {
@@ -1573,6 +1634,7 @@ public:
 							{
 								(*selected_puzzlepiece)->SetSelected(false);
 								(*selected_puzzlepiece)->setCurrentSprite(NOT_SELECTED);
+
 							}
 							selected = true;
 							CurrentSprite = SELECTED;
@@ -1863,6 +1925,7 @@ public:
 				Puzzlepieces[i][j].SetSelected(false);
 				Puzzlepieces[i][j].setInSlot(false);
 				Puzzlepieces[i][j].setPosition();
+				Puzzlepieces[i][j].setCurrentSprite(NOT_SELECTED);
 				Slots[i][j].setContainedPuzzlepiece(nullptr);
 				Slots[i][j].setSelected(false);
 			}
@@ -1888,7 +1951,7 @@ public:
 		PuzzlePiece* selected_puzzlepiece = nullptr;
 		Timer timer;
 		timer.loadNumb();
-		stop_timer = false;
+		//stop_timer = false;
 		thread th(&Timer::timeGo, ref(timer));//ref - используется 
 		th.detach();
 		
@@ -1911,7 +1974,7 @@ public:
 						return CLOSE_GAME;
 					}
 						
-					stop_timer = false;
+					//stop_timer = false;
 					thread th(&Timer::timeGo, ref(timer));//ref - используется 
 					th.detach();
 					RenderBG();
@@ -1938,26 +2001,32 @@ public:
 			}
 			if (event[ButtonsInGame::BACK_TO_CH_LEV] == LButtonSprite::BUTTON_SPRITE_MOUSE_DOWN)
 			{
-
-				back.render();
 				stop_timer = true;
+				back.render();
+				
 				SDL_RenderPresent(gRenderer);
-				back.SetMCurrentSprite(LButtonSprite::BUTTON_SPRITE_MOUSE_OUT);
+				
 				SDL_Delay(200);
+
 				if (is_exit(e))
 				{
 					Clean();
 					return Window::GAME_WIND;
 				}
-					
-				stop_timer = false;
-				thread th(&Timer::timeGo, ref(timer));//ref - используется 
-				th.detach();
+			
+				back.SetMCurrentSprite(LButtonSprite::BUTTON_SPRITE_MOUSE_OUT);
+				event[ButtonsInGame::BACK_TO_CH_LEV] = back.handleEvent(&e);
 				RenderBG();
 				back.render();
+				//SDL_RenderPresent(gRenderer);
 				render();
+				
+				////stop_timer = false;
 				timer.PrintAll();
-				SDL_RenderPresent(gRenderer);
+				thread th(&Timer::timeGo, ref(timer));//ref - используется 
+				th.detach();
+				
+				
 			}
 			else if (event[ButtonsInGame::BACK_TO_CH_LEV] == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION
 				|| event[ButtonsInGame::BACK_TO_CH_LEV]== LButtonSprite::BUTTON_SPRITE_MOUSE_OUT)
@@ -1965,7 +2034,7 @@ public:
 				//SDL_RenderClear(gRenderer);
 				//RenderBG();
 				back.render();
-				SDL_RenderPresent(gRenderer);
+				//SDL_RenderPresent(gRenderer);
 			}
 
 			if (event[ButtonsInGame::RESET] == LButtonSprite::BUTTON_SPRITE_MOUSE_DOWN)
@@ -1980,6 +2049,7 @@ public:
 				//timer.Reset();
 				RenderBG();
 				render();
+
 				back.render();
 				reset.render();
 				SDL_Delay(100);
@@ -2030,12 +2100,39 @@ public:
 			//Nuta Here is Exit, because timer is over.
 			if (timer.GetCountSec() == 0) 
 			{
-				return Window::GAME_WIND;
+				stop_timer = true;
+				Lose l;
+				int window = l.click_window();
+				if(window == ButtonsInGame::BACK_TO_CH_LEV)
+					return Window::GAME_WIND;
+				else if (window == ButtonsInGame::RESET)
+				{
+					switch (level)
+					{
+					case 1:
+						Clean();
+
+						return Window::LEVEL1_WIND;
+						break;
+					case 2:
+						Clean();
+						return Window::LEVEL2_WIND;
+						break;
+					case 3:
+						Clean();
+						return Window::LEVEL3_WIND;
+						break;
+					default:
+						break;
+					}
+				}
+			
 			}
 			if (AllSlotsFilled())
 			{
 				if (IsOrderCorrect())
 				{
+
 					File current_level_f;
 					int current_lev = current_level_f.num_from_file();
 					if (level - 1 == current_lev)
@@ -2045,6 +2142,10 @@ public:
 					stop_timer = true;
 					current_level_f.rewrite_in_file_num(current_lev);
 					cout << "Kruto\n";
+					field_texture.loadFromFile("img\\Gameplay\\Win.png");
+					RenderBG();
+					SDL_RenderPresent(gRenderer);
+					SDL_Delay(500);
 					switch (level)
 					{
 					case 1:
@@ -2068,7 +2169,7 @@ public:
 				else
 				{
 					cout << "Ne kruto\n";
-					Reset(&selected_puzzlepiece, &selected_slot);
+					//Reset(&selected_puzzlepiece, &selected_slot);
 				}
 
 			}
