@@ -1243,7 +1243,7 @@ bool is_exit(int selected_window, SDL_Event ev)
 class Lose : public CurrentWindow
 {
 public:
-	Lose() :CurrentWindow(306, 670, 460, 108, 430, ExitButtons::COUNT_OF_BUT, Window::EXIT_WIND, false)
+	Lose() :CurrentWindow(484, 650, 414, 106, 113, ExitButtons::COUNT_OF_BUT, Window::EXIT_WIND, false)
 	{
 
 	}
@@ -1254,11 +1254,11 @@ public:
 	bool LoadButton()override
 	{
 		bool success = true;
-		if (!button[YES].loadButton("img\\Exit\\yes.png"))
+		if (!button[YES].loadButton("img\\Gameplay\\Back.png"))
 		{
 			success = false;
 		}
-		if (!button[NO].loadButton("img\\Exit\\no.png"))
+		if (!button[NO].loadButton("img\\Gameplay\\Reset.png"))
 		{
 			success = false;
 		}
@@ -1660,6 +1660,7 @@ public:
 						{
 							(*selected_slot)->setSelected(false);
 							(*selected_slot)->setContainedPuzzlepiece(nullptr);
+
 							*selected_slot = nullptr;
 							cout << "Puzzlepiece dropped from slot\n";
 						}
@@ -2108,6 +2109,7 @@ public:
 						selected_slot = &Slots[i][j];
 						//cout << "Slot " << Slots[i][j].getNumber() << " selected\n";
 						i = PUZZLEPIECES_VERT;
+						
 						break;
 					}
 				}
@@ -2124,8 +2126,10 @@ public:
 						if (Puzzlepieces[i][j].UpdatePosition(&selected_slot))
 						{
 							pzz_event = true;
+							
 						}
 						i = PUZZLEPIECES_VERT;
+						
 						break;
 					}
 				}
