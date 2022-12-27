@@ -528,7 +528,7 @@ class Timer
 
 	Cutting numbers;
 public:
-	Timer() : Timer(90, 30) {}
+	Timer() : Timer(2, 30) {}
 	Timer(int count_of_sec, int width_of_numb)
 	{
 		this->count_of_sec = count_of_sec;
@@ -825,22 +825,22 @@ public:
 					return SelectedButtonInCurrentWindow(i);
 				}
 				else if (event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION 
-					//|| event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT
+					|| event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT
 					)
 				{
 					//SDL_RenderClear(gRenderer);
-					//texture_bg.renderP();
+					texture_bg.renderP();
 
-					//for (int i = 0; i < count_of_but; i++)
-					//{
+					for (int i = 0; i < count_of_but; i++)
+					{
 						button[i].render();
-					//}
-						previos_click[i] = LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION;
+					}
+						//previos_click[i] = LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION;
 				}
 				else if (event_buttons[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OUT 
 					&& previos_click[i] == LButtonSprite::BUTTON_SPRITE_MOUSE_OVER_MOTION)
 				{
-						button[i].render();
+						//button[i].render();
 				}
 			}
 			//Update screen
@@ -1243,7 +1243,7 @@ bool is_exit(int selected_window, SDL_Event ev)
 class Lose : public CurrentWindow
 {
 public:
-	Lose() :CurrentWindow(484, 650, 414, 106, 113, ExitButtons::COUNT_OF_BUT, Window::EXIT_WIND, false)
+	Lose() :CurrentWindow(484, 650, 414, 113, 106, 2, Window::EXIT_WIND, false)
 	{
 
 	}
@@ -1283,8 +1283,8 @@ public:
 			case ButtonsInGame::RESET:
 				return ButtonsInGame::RESET;
 				break;
-			case EXIT_WIND:
-				return EXIT_WIND;
+			case CLOSE_GAME:
+				return CLOSE_GAME;
 			}
 	}
 };
@@ -2163,6 +2163,12 @@ public:
 						break;
 					}
 				}
+				else
+				{
+					Clean();
+					return Window::CLOSE_GAME;
+				}
+
 			
 			}
 			if (AllSlotsFilled())
